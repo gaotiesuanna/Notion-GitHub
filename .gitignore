@@ -7,6 +7,9 @@ __pycache__/
 
 # macOS
 .DS_Store
+.history
 
 # Excel temp lock files
 ~$*.xlsx
+
+

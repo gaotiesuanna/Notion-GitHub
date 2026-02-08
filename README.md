@@ -4,6 +4,8 @@
 
 ## 在线 Notion 看板与截图
 
+- 本人正在学习 AI，当前收集的项目基本都和 AI 相关，已累计收集 56 个项目。
+
 - Notion 链接：
   https://gray-color-594.notion.site/8bffbc8c93714bc6b48454e776bdcab9?v=f22d4cd734fa40e7b9fecb347ecd26c8
 

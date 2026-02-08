@@ -36,22 +36,6 @@
 └─────────────────────────┘
 ```
 
----
-
-## 📁 文件结构
-
-```
-github-notion-sync/
-├── projects.json              # 项目配置文件(你的格式)
-├── sync_github_to_notion.py   # 主同步脚本
-├── requirements.txt           # Python 依赖
-├── .env.example              # 环境变量模板
-├── README.md                 # 使用文档
-└── notion_template.md        # Notion 数据库结构说明
-```
-
----
-
 ## 🎯 核心功能
 
 ### 1. 配置文件 (projects.json)
@@ -319,16 +303,4 @@ jobs:
 - [Notion API 文档](https://developers.notion.com/)
 - [GitHub REST API 文档](https://docs.github.com/rest)
 - [Notion 数据库最佳实践](https://www.notion.so/help/guides/creating-a-database)
-
----
-
-## 🎯 下一步
-
-接下来我将为你创建:
-1. ✅ 完整的 Python 同步脚本
-2. ✅ projects.json 配置模板
-3. ✅ requirements.txt 依赖文件
-4. ✅ .env 环境变量模板
-5. ✅ README.md 使用文档
-6. ✅ Notion 数据库结构说明
 

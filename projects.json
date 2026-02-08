@@ -1,0 +1,774 @@
+{
+  "categories": [
+    {
+      "id": "ai-agents",
+      "name": "AI Agent 框架",
+      "icon": "🤖",
+      "projects": [
+        {
+          "id": "crewai",
+          "name": "CrewAI",
+          "description": "Framework for orchestrating role-playing, autonomous AI agents",
+          "github": "https://github.com/crewAIInc/crewAI",
+          "topics": [
+            "ai",
+            "agents",
+            "framework"
+          ],
+          "notion_page_id": "300d0e79-ce27-810d-a5e6-f762bfee365d"
+        },
+        {
+          "id": "langgraph",
+          "name": "LangGraph",
+          "description": "Framework for building stateful, multi-actor applications with LLMs",
+          "github": "https://github.com/langchain-ai/langgraph",
+          "topics": [
+            "llm",
+            "agents",
+            "orchestration"
+          ],
+          "notion_page_id": "300d0e79-ce27-81cb-b11b-d5a16a87f7ef"
+        },
+        {
+          "id": "autogen",
+          "name": "AutoGen",
+          "description": "Framework for building AI agents and multi-agent systems",
+          "github": "https://github.com/microsoft/autogen",
+          "topics": [
+            "ai",
+            "agents",
+            "framework"
+          ],
+          "notion_page_id": "300d0e79-ce27-818d-8564-c8ab968b1f1f"
+        },
+        {
+          "id": "swarm",
+          "name": "Swarm",
+          "description": "Educational framework for lightweight multi-agent orchestration",
+          "github": "https://github.com/openai/swarm",
+          "topics": [
+            "ai",
+            "agents",
+            "orchestration"
+          ],
+          "notion_page_id": "300d0e79-ce27-8189-8ee6-c2afe4143dfa"
+        },
+        {
+          "id": "nanobot",
+          "name": "nanobot",
+          "description": "Lightweight AI agent framework and tooling",
+          "github": "https://github.com/HKUDS/nanobot",
+          "topics": [
+            "ai",
+            "agents",
+            "framework"
+          ],
+          "notion_page_id": "300d0e79-ce27-81fa-ad3e-f6cb074f1dc7"
+        },
+        {
+          "id": "ten-framework",
+          "name": "TEN Framework",
+          "description": "Open-source framework for building real-time multimodal AI agents",
+          "github": "https://github.com/TEN-framework/ten-framework",
+          "topics": [
+            "ai",
+            "agents",
+            "framework"
+          ],
+          "notion_page_id": "300d0e79-ce27-814b-91a7-f9ad894faa5c"
+        }
+      ]
+    },
+    {
+      "id": "memory",
+      "name": "记忆系统",
+      "icon": "🧠",
+      "projects": [
+        {
+          "id": "memoryos",
+          "name": "MemoryOS",
+          "description": "Persistent memory operating layer for AI agents",
+          "github": "https://github.com/BAI-LAB/MemoryOS",
+          "topics": [
+            "memory",
+            "agents",
+            "ai"
+          ],
+          "notion_page_id": "300d0e79-ce27-814e-908f-e19f0bf369a3"
+        },
+        {
+          "id": "mem0",
+          "name": "mem0",
+          "description": "Memory layer for personalized AI applications and agents",
+          "github": "https://github.com/mem0ai/mem0",
+          "topics": [
+            "memory",
+            "ai",
+            "personalization"
+          ],
+          "notion_page_id": "300d0e79-ce27-81c1-9461-dbe40bf2195e"
+        },
+        {
+          "id": "letta",
+          "name": "Letta",
+          "description": "Stateful agent framework with long-term memory",
+          "github": "https://github.com/letta-ai/letta",
+          "topics": [
+            "agents",
+            "memory",
+            "llm"
+          ],
+          "notion_page_id": "300d0e79-ce27-81a0-a418-e7690e8f1176"
+        }
+      ]
+    },
+    {
+      "id": "data-workflow",
+      "name": "数据与工作流",
+      "icon": "🗂️",
+      "projects": [
+        {
+          "id": "deepwiki-mcp",
+          "name": "deepwiki-mcp",
+          "description": "MCP server integration for DeepWiki-style knowledge workflows",
+          "github": "https://github.com/regenrek/deepwiki-mcp",
+          "topics": [
+            "mcp",
+            "knowledge",
+            "workflow"
+          ],
+          "notion_page_id": "300d0e79-ce27-8166-93f0-d10c442fa92b"
+        },
+        {
+          "id": "dataflow",
+          "name": "DataFlow",
+          "description": "Open framework for data-centric AI workflows",
+          "github": "https://github.com/OpenDCAI/DataFlow",
+          "topics": [
+            "data",
+            "workflow",
+            "ai"
+          ],
+          "notion_page_id": "300d0e79-ce27-8151-b103-f48d1f14781f"
+        },
+        {
+          "id": "dataflow-agent",
+          "name": "DataFlow-Agent",
+          "description": "Agent extension for DataFlow workflow orchestration",
+          "github": "https://github.com/OpenDCAI/DataFlow-Agent",
+          "topics": [
+            "agents",
+            "workflow",
+            "data"
+          ],
+          "notion_page_id": "300d0e79-ce27-817f-9b57-cec9f1afe155"
+        },
+        {
+          "id": "ragflow",
+          "name": "RAGFlow",
+          "description": "Open-source RAG workflow platform for document QA and knowledge apps",
+          "github": "https://github.com/infiniflow/ragflow",
+          "topics": [
+            "rag",
+            "workflow",
+            "knowledge-base"
+          ],
+          "notion_page_id": "300d0e79-ce27-8102-a9cd-dbc60b3d4f89"
+        },
+        {
+          "id": "dify",
+          "name": "Dify",
+          "description": "LLM application development platform with workflow orchestration",
+          "github": "https://github.com/langgenius/dify",
+          "topics": [
+            "llm",
+            "workflow",
+            "ai-app"
+          ],
+          "notion_page_id": "300d0e79-ce27-8114-9c42-fbb7a6321c71"
+        }
+      ]
+    },
+    {
+      "id": "llm-training",
+      "name": "LLM 训练与微调",
+      "icon": "🧪",
+      "projects": [
+        {
+          "id": "minimind",
+          "name": "MiniMind",
+          "description": "Lightweight minimal LLM training and inference project",
+          "github": "https://github.com/jingyaogong/minimind",
+          "topics": [
+            "llm",
+            "training",
+            "inference"
+          ],
+          "notion_page_id": "300d0e79-ce27-810e-8d34-c098f8ee421f"
+        },
+        {
+          "id": "ms-swift",
+          "name": "ms-swift",
+          "description": "ModelScope framework for LLM training, fine-tuning, and deployment",
+          "github": "https://github.com/modelscope/ms-swift",
+          "topics": [
+            "llm",
+            "finetuning",
+            "deployment"
+          ],
+          "notion_page_id": "300d0e79-ce27-81be-a764-fded4211ff1b"
+        },
+        {
+          "id": "llamafactory",
+          "name": "LLaMA-Factory",
+          "description": "Unified and efficient fine-tuning framework for large language models",
+          "github": "https://github.com/hiyouga/LlamaFactory",
+          "topics": [
+            "llm",
+            "finetuning",
+            "training"
+          ],
+          "notion_page_id": "300d0e79-ce27-8102-ba22-ef1f41de00a9"
+        }
+      ]
+    },
+    {
+      "id": "agent-apps",
+      "name": "Agent 应用与协议",
+      "icon": "🧩",
+      "projects": [
+        {
+          "id": "trainpptagent",
+          "name": "TrainPPTAgent",
+          "description": "Agent for generating and training presentation workflows",
+          "github": "https://github.com/johnson7788/TrainPPTAgent",
+          "topics": [
+            "agent",
+            "ppt",
+            "automation"
+          ],
+          "notion_page_id": "300d0e79-ce27-81bf-a155-d9743510696f"
+        },
+        {
+          "id": "ag-ui",
+          "name": "ag-ui",
+          "description": "Protocol for interoperable agent-user interface communication",
+          "github": "https://github.com/ag-ui-protocol/ag-ui",
+          "topics": [
+            "protocol",
+            "ui",
+            "agents"
+          ],
+          "notion_page_id": "300d0e79-ce27-8183-8ebd-cd74a1fa3c34"
+        },
+        {
+          "id": "open-avatar-chat",
+          "name": "OpenAvatarChat",
+          "description": "Open-source avatar chat application for human-AI interaction",
+          "github": "https://github.com/HumanAIGC-Engineering/OpenAvatarChat",
+          "topics": [
+            "avatar",
+            "chat",
+            "ai"
+          ],
+          "notion_page_id": "300d0e79-ce27-810a-b01d-f96cf39807ce"
+        }
+      ]
+    },
+    {
+      "id": "practice-projects",
+      "name": "练习项目",
+      "icon": "🧭",
+      "projects": [
+        {
+          "id": "asr-llm-tts",
+          "name": "asr-llm-tts",
+          "description": "Practice project integrating ASR, LLM, and TTS pipeline",
+          "github": "https://github.com/muggle-stack/asr-llm-tts",
+          "topics": [
+            "asr",
+            "llm",
+            "tts"
+          ],
+          "notion_page_id": "300d0e79-ce27-817d-8528-f06a93916e38"
+        },
+        {
+          "id": "sdyj-multi-agents",
+          "name": "SDYJ_Multi_Agents",
+          "description": "Practice project for building multi-agent collaboration workflows",
+          "github": "https://github.com/hwfengcs/SDYJ_Multi_Agents",
+          "topics": [
+            "multi-agent",
+            "practice",
+            "workflow"
+          ],
+          "notion_page_id": "300d0e79-ce27-8127-a02c-fb251943f2e2"
+        }
+      ]
+    },
+    {
+      "id": "frontend-components",
+      "name": "前端组件",
+      "icon": "🎨",
+      "projects": [
+        {
+          "id": "shadcn-ui",
+          "name": "shadcn-ui",
+          "description": "Popular frontend component system and UI building blocks",
+          "github": "https://github.com/shadcn-ui/ui",
+          "topics": [
+            "frontend",
+            "components",
+            "ui"
+          ],
+          "notion_page_id": "300d0e79-ce27-8123-9579-dc538213105f"
+        },
+        {
+          "id": "superdesign",
+          "name": "superdesign",
+          "description": "Frontend component library and design system utilities",
+          "github": "https://github.com/superdesigndev/superdesign",
+          "topics": [
+            "frontend",
+            "components",
+            "design-system"
+          ],
+          "notion_page_id": "300d0e79-ce27-819b-9eee-d4402848d2ea"
+        }
+      ]
+    },
+    {
+      "id": "ai-trader",
+      "name": "AI-Trader",
+      "icon": "📈",
+      "projects": [
+        {
+          "id": "ai-trade-game",
+          "name": "AITradeGame",
+          "description": "AI-powered trading simulation and strategy game project",
+          "github": "https://github.com/chadyi/AITradeGame",
+          "topics": [
+            "ai",
+            "trading",
+            "simulation"
+          ],
+          "notion_page_id": "300d0e79-ce27-811e-9d25-f7e0d58e192a"
+        },
+        {
+          "id": "ai-trader-hkuds",
+          "name": "AI-Trader",
+          "description": "AI-driven trader framework and research project",
+          "github": "https://github.com/HKUDS/AI-Trader",
+          "topics": [
+            "ai",
+            "trader",
+            "finance"
+          ],
+          "notion_page_id": "300d0e79-ce27-8133-af38-db68440ac074"
+        },
+        {
+          "id": "ai-trading-agent-hkirat",
+          "name": "ai-trading-agent",
+          "description": "Agent-based automated trading workflow project",
+          "github": "https://github.com/hkirat/ai-trading-agent",
+          "topics": [
+            "ai",
+            "agent",
+            "trading"
+          ],
+          "notion_page_id": "300d0e79-ce27-817b-99e5-c488c6215599"
+        },
+        {
+          "id": "finance-trading-ai-agents-mcp",
+          "name": "finance-trading-ai-agents-mcp",
+          "description": "Finance trading AI agents with MCP integration",
+          "github": "https://github.com/aitrados/finance-trading-ai-agents-mcp",
+          "topics": [
+            "finance",
+            "trading",
+            "mcp"
+          ],
+          "notion_page_id": "300d0e79-ce27-8102-8d81-f6c9607a478f"
+        },
+        {
+          "id": "tradingagents-cn",
+          "name": "TradingAgents-CN",
+          "description": "Chinese adaptation of multi-agent trading system",
+          "github": "https://github.com/hsliuping/TradingAgents-CN",
+          "topics": [
+            "trading",
+            "agents",
+            "cn"
+          ],
+          "notion_page_id": "300d0e79-ce27-81a8-bdd4-e3598fa5538a"
+        },
+        {
+          "id": "tradingagents",
+          "name": "TradingAgents",
+          "description": "Multi-agent architecture for quantitative trading research",
+          "github": "https://github.com/TauricResearch/TradingAgents",
+          "topics": [
+            "trading",
+            "agents",
+            "quant"
+          ],
+          "notion_page_id": "300d0e79-ce27-8166-b8ee-fe7036896318"
+        },
+        {
+          "id": "stock-quant",
+          "name": "stock-quant",
+          "description": "Stock quantitative analysis and trading strategy toolkit",
+          "github": "https://github.com/zhaoxusun/stock-quant",
+          "topics": [
+            "stock",
+            "quant",
+            "trading"
+          ],
+          "notion_page_id": "300d0e79-ce27-81d1-a1b1-daa6dff5e4a3"
+        }
+      ]
+    },
+    {
+      "id": "books",
+      "name": "书籍",
+      "icon": "📚",
+      "projects": [
+        {
+          "id": "reasoning-from-scratch",
+          "name": "reasoning-from-scratch",
+          "description": "Book project: build and understand LLM reasoning from scratch",
+          "github": "https://github.com/rasbt/reasoning-from-scratch",
+          "topics": [
+            "book",
+            "reasoning",
+            "llm"
+          ],
+          "notion_page_id": "300d0e79-ce27-8154-b542-ca7aa6812d8e"
+        },
+        {
+          "id": "reasoning-from-scratch-cn",
+          "name": "reasoning-from-scratch-CN",
+          "description": "Chinese edition of reasoning-from-scratch book project",
+          "github": "https://github.com/MLNLP-World/reasoning-from-scratch-CN",
+          "topics": [
+            "book",
+            "reasoning",
+            "cn"
+          ],
+          "notion_page_id": "300d0e79-ce27-81a7-b368-d9d9ade91e23"
+        },
+        {
+          "id": "llms-from-scratch-cn",
+          "name": "LLMs-from-scratch-CN",
+          "description": "Chinese edition of LLMs-from-scratch book project",
+          "github": "https://github.com/MLNLP-World/LLMs-from-scratch-CN",
+          "topics": [
+            "book",
+            "llm",
+            "cn"
+          ],
+          "notion_page_id": "300d0e79-ce27-814e-8a7b-f7530ac092ab"
+        },
+        {
+          "id": "llms-from-scratch",
+          "name": "LLMs-from-scratch",
+          "description": "Book project: learn large language models from scratch",
+          "github": "https://github.com/rasbt/LLMs-from-scratch",
+          "topics": [
+            "book",
+            "llm",
+            "from-scratch"
+          ],
+          "notion_page_id": "300d0e79-ce27-8185-8125-c45f0fda2ba1"
+        },
+        {
+          "id": "vibe-coding-cn",
+          "name": "vibe-coding-cn",
+          "description": "Chinese learning material repository for vibe coding",
+          "github": "https://github.com/2025Emma/vibe-coding-cn",
+          "topics": [
+            "book",
+            "coding",
+            "cn"
+          ],
+          "notion_page_id": "300d0e79-ce27-8164-b8b0-d450b2c7a814"
+        },
+        {
+          "id": "hello-agents",
+          "name": "Hello-Agents",
+          "description": "Educational book-style project for getting started with AI agents",
+          "github": "https://github.com/datawhalechina/Hello-Agents",
+          "topics": [
+            "book",
+            "agents",
+            "education"
+          ],
+          "notion_page_id": "300d0e79-ce27-8162-85a3-cc5174146797"
+        },
+        {
+          "id": "intro-llm-code",
+          "name": "intro-llm-code",
+          "description": "Code companion repository for introductory LLM learning materials",
+          "github": "https://github.com/intro-llm/intro-llm-code",
+          "topics": [
+            "book",
+            "llm",
+            "education"
+          ],
+          "notion_page_id": "300d0e79-ce27-81c0-b736-f258305cb36e"
+        },
+        {
+          "id": "easy-rl",
+          "name": "easy-rl",
+          "description": "Educational reinforcement learning repository with book-style tutorials",
+          "github": "https://github.com/datawhalechina/easy-rl",
+          "topics": [
+            "book",
+            "rl",
+            "education"
+          ],
+          "notion_page_id": "300d0e79-ce27-81c2-a134-d03854ae2a00"
+        }
+      ]
+    },
+    {
+      "id": "pdf-translation",
+      "name": "PDF 翻译",
+      "icon": "🌐",
+      "projects": [
+        {
+          "id": "zotero-pdf2zh",
+          "name": "zotero-pdf2zh",
+          "description": "Translate PDF papers to Chinese with Zotero integration",
+          "github": "https://github.com/guaguastandup/zotero-pdf2zh",
+          "topics": [
+            "pdf",
+            "translation",
+            "zotero"
+          ],
+          "notion_page_id": "300d0e79-ce27-81fe-914d-fe62005b026c"
+        },
+        {
+          "id": "babeldoc",
+          "name": "BabelDOC",
+          "description": "PDF translation and multilingual document processing toolkit",
+          "github": "https://github.com/funstory-ai/BabelDOC",
+          "topics": [
+            "pdf",
+            "translation",
+            "multilingual"
+          ],
+          "notion_page_id": "300d0e79-ce27-8169-9363-d2844ae62b54"
+        },
+        {
+          "id": "pdf-math-translate",
+          "name": "PDFMathTranslate",
+          "description": "Translate mathematical and scientific PDF content with structure awareness",
+          "github": "https://github.com/PDFMathTranslate/PDFMathTranslate",
+          "topics": [
+            "pdf",
+            "translation",
+            "math"
+          ],
+          "notion_page_id": "300d0e79-ce27-8128-8662-cff46037c483"
+        }
+      ]
+    },
+    {
+      "id": "pdf-parsing",
+      "name": "PDF 解析",
+      "icon": "📄",
+      "projects": [
+        {
+          "id": "mineru",
+          "name": "MinerU",
+          "description": "Open-source toolkit for PDF parsing and document structure extraction",
+          "github": "https://github.com/opendatalab/MinerU",
+          "topics": [
+            "pdf",
+            "parsing",
+            "document-ai"
+          ],
+          "notion_page_id": "300d0e79-ce27-8165-825e-f7f89beb878e"
+        },
+        {
+          "id": "paddleocr",
+          "name": "PaddleOCR",
+          "description": "OCR toolkit for document parsing and text extraction",
+          "github": "https://github.com/PaddlePaddle/PaddleOCR",
+          "topics": [
+            "ocr",
+            "pdf",
+            "document-ai"
+          ],
+          "notion_page_id": "300d0e79-ce27-819e-94ef-e76e2723bf6a"
+        },
+        {
+          "id": "docling",
+          "name": "docling",
+          "description": "Toolkit for document understanding and PDF parsing workflows",
+          "github": "https://github.com/DS4SD/docling",
+          "topics": [
+            "pdf",
+            "parsing",
+            "document-ai"
+          ],
+          "notion_page_id": "300d0e79-ce27-8165-8434-cf340bbfd01c"
+        },
+        {
+          "id": "open-parse",
+          "name": "open-parse",
+          "description": "Open-source parser for extracting structured content from documents",
+          "github": "https://github.com/Filimoa/open-parse",
+          "topics": [
+            "pdf",
+            "parsing",
+            "extraction"
+          ],
+          "notion_page_id": "300d0e79-ce27-8175-a1b4-d97a7f5844a0"
+        },
+        {
+          "id": "pdf-extract-kit",
+          "name": "PDF-Extract-Kit",
+          "description": "Toolkit for extracting structured information from PDF documents",
+          "github": "https://github.com/opendatalab/PDF-Extract-Kit",
+          "topics": [
+            "pdf",
+            "extraction",
+            "document-ai"
+          ],
+          "notion_page_id": "300d0e79-ce27-8171-8241-ef7ee2ba34b1"
+        }
+      ]
+    },
+    {
+      "id": "inference-frameworks",
+      "name": "推理框架",
+      "icon": "⚙️",
+      "projects": [
+        {
+          "id": "vllm",
+          "name": "vLLM",
+          "description": "High-throughput and memory-efficient LLM inference and serving engine",
+          "github": "https://github.com/vllm-project/vllm",
+          "topics": [
+            "inference",
+            "serving",
+            "llm"
+          ],
+          "notion_page_id": "300d0e79-ce27-813a-9568-d1cfc9e7790e"
+        },
+        {
+          "id": "sglang",
+          "name": "SGLang",
+          "description": "Fast LLM serving framework with structured generation runtime",
+          "github": "https://github.com/sgl-project/sglang",
+          "topics": [
+            "inference",
+            "serving",
+            "runtime"
+          ],
+          "notion_page_id": "300d0e79-ce27-81dc-adf3-c2ac130f7daf"
+        },
+        {
+          "id": "llama-cpp",
+          "name": "llama.cpp",
+          "description": "C/C++ inference runtime for LLMs with efficient local deployment",
+          "github": "https://github.com/ggml-org/llama.cpp",
+          "topics": [
+            "inference",
+            "ggml",
+            "local-llm"
+          ],
+          "notion_page_id": "300d0e79-ce27-810a-a73f-f448ec025433"
+        }
+      ]
+    },
+    {
+      "id": "tools",
+      "name": "工具",
+      "icon": "🛠️",
+      "projects": [
+        {
+          "id": "aionui",
+          "name": "AionUi",
+          "description": "AI productivity UI toolset and utility platform",
+          "github": "https://github.com/iOfficeAI/AionUi",
+          "topics": [
+            "tool",
+            "ui",
+            "productivity"
+          ],
+          "notion_page_id": "300d0e79-ce27-81cf-b14e-c7dcf8b06178"
+        },
+        {
+          "id": "pastemd",
+          "name": "PasteMD",
+          "description": "Tool for converting and managing pasted content into Markdown",
+          "github": "https://github.com/RICHQAQ/PasteMD",
+          "topics": [
+            "tool",
+            "markdown",
+            "productivity"
+          ],
+          "notion_page_id": "300d0e79-ce27-8148-8215-d41868298788"
+        },
+        {
+          "id": "nuclear",
+          "name": "nuclear",
+          "description": "Open-source music player and media utility application",
+          "github": "https://github.com/nukeop/nuclear",
+          "topics": [
+            "tool",
+            "desktop",
+            "media"
+          ],
+          "notion_page_id": "300d0e79-ce27-8194-8006-f3252ec7f259"
+        },
+        {
+          "id": "next-ai-draw-io",
+          "name": "next-ai-draw-io",
+          "description": "AI-assisted diagramming and flowchart generation tool",
+          "github": "https://github.com/DayuanJiang/next-ai-draw-io",
+          "topics": [
+            "tool",
+            "diagram",
+            "ai"
+          ],
+          "notion_page_id": "300d0e79-ce27-812a-ad40-cf8897b1f4b1"
+        },
+        {
+          "id": "antigravityquotawatcher",
+          "name": "AntigravityQuotaWatcher",
+          "description": "Quota monitoring and alerting utility for Antigravity services",
+          "github": "https://github.com/wusimpl/AntigravityQuotaWatcher",
+          "topics": [
+            "tool",
+            "monitoring",
+            "quota"
+          ],
+          "notion_page_id": "300d0e79-ce27-81a1-bee3-c615d19fe26b"
+        }
+      ]
+    },
+    {
+      "id": "rag",
+      "name": "RAG 与代码理解",
+      "icon": "🔎",
+      "projects": [
+        {
+          "id": "code-graph-rag",
+          "name": "code-graph-rag",
+          "description": "Graph-based retrieval-augmented generation for code understanding",
+          "github": "https://github.com/vitali87/code-graph-rag",
+          "topics": [
+            "rag",
+            "code",
+            "graph"
+          ],
+          "notion_page_id": "300d0e79-ce27-81a4-8bb7-d6eb9347ef22"
+        }
+      ]
+    }
+  ]
+}

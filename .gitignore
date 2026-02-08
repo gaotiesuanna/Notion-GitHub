@@ -1,0 +1,12 @@
+# Local environment
+.env
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# macOS
+.DS_Store
+
+# Excel temp lock files
+~$*.xlsx

@@ -1,213 +1,124 @@
-# GitHub → Notion 项目同步工具
+# GitHub -> Notion 项目同步工具
 
-自动同步 GitHub 项目信息到 Notion 数据库,跟踪 Stars、Forks、活跃度等统计数据。
+自动同步 GitHub 项目信息到 Notion 数据库，当前以 `projects.xlsx` 作为项目配置源。
 
-## ✨ 功能特点
+## 功能
 
-- 🔄 **自动同步** GitHub 仓库信息到 Notion
-- ⭐ **实时统计** Stars、Forks、Watchers、Issues 数量
-- 🏷️ **技术标签** 自动同步 GitHub Topics
-- 📅 **活跃度追踪** 记录最后更新和推送时间
-- 💾 **配置管理** 基于 JSON 的项目配置
-- 🔐 **安全** 支持私有仓库 (使用 GitHub Token)
+- 自动同步 GitHub 仓库信息到 Notion
+- 同步 Stars、Forks、Watchers、Issues、Topics 等字段
+- 支持 `create_only` / `update_only` / `all` 三种模式
+- 支持按 Notion 的“分类”字段反向对齐本地分类（可选）
+- 配置文件使用 Excel（`projects.xlsx`）
 
-## 📦 文件说明
+## 文件结构
 
+```text
+notion_github/
+├── sync.py                               # 主同步脚本
+├── reconcile_categories_from_notion.py   # 按 Notion 分类回写本地分类
+├── project_store.py                      # Excel 存储层
+├── projects.xlsx                         # 项目配置文件（主）
+├── projects.json                         # 旧版 JSON（可作为迁移来源）
+├── requirements.txt
+├── .env.example
+└── QUICKSTART.md
 ```
-github-notion-sync/
-├── sync.py              # 主同步脚本
-├── projects.json        # 项目配置文件
-├── requirements.txt     # Python 依赖
-├── .env.example         # 环境变量模板
-├── QUICKSTART.md        # 快速开始指南 ⭐ 重要
-├── SOLUTION.md          # 完整方案说明
-├── NOTION_SETUP_GUIDE.md    # Notion 设置教程
-└── GET_DATABASE_ID.md   # Database ID 获取指南
-```
 
-## 🚀 快速开始
+## 快速开始
 
 ### 1. 安装依赖
+
 ```bash
 pip install -r requirements.txt
 ```
 
 ### 2. 配置环境变量
-```bash
-export NOTION_TOKEN="secret_xxxxxxxxxxxxx"
-export NOTION_DATABASE_ID="your_database_id"
-export GITHUB_TOKEN="ghp_xxxxxxxxxxxxx"  # 可选
-```
 
-### 3. 编辑 projects.json
-```json
-{
-  "projects": [
-    {
-      "id": "crewai",
-      "name": "CrewAI",
-      "github": "https://github.com/crewAIInc/crewAI",
-      "topics": ["ai", "agents"],
-      "notion_page_id": ""
-    }
-  ]
-}
-```
+可复制 `.env.example` 到 `.env` 并填写：
+
+| 变量名 | 必需 | 说明 |
+|---|---|---|
+| `NOTION_TOKEN` | 是 | Notion Integration Token |
+| `NOTION_DATABASE_ID` | 是 | Notion 数据库 ID |
+| `GITHUB_TOKEN` | 否 | GitHub Token（推荐） |
+| `PROJECTS_FILE` | 否 | 配置文件路径，默认 `projects.xlsx` |
+| `SYNC_MODE` | 否 | `all` / `create_only` / `update_only` |
+| `SYNC_CATEGORY_FROM_NOTION` | 否 | `true/false`，是否先执行分类反向同步 |
+
+### 3. 维护 `projects.xlsx`
+
+`projects.xlsx` 包含两个工作表：
+
+1. `categories`
+
+| 列名 | 说明 |
+|---|---|
+| `id` | 分类唯一 ID（如 `ai-agents`） |
+| `name` | 分类名称（如 `AI Agent 框架`） |
+| `icon` | 分类图标（可选） |
+| `order` | 排序（数字越小越靠前） |
+
+2. `projects`
+
+| 列名 | 说明 |
+|---|---|
+| `category_id` | 所属分类 ID（对应 `categories.id`） |
+| `id` | 项目唯一 ID |
+| `name` | 项目名 |
+| `description` | 项目描述 |
+| `github` | GitHub 仓库 URL |
+| `topics` | 逗号分隔（如 `ai, agents`） |
+| `notion_page_id` | 已同步后会回写 |
+| `order` | 分类内排序 |
 
 ### 4. 运行同步
+
 ```bash
 python sync.py
 ```
 
-## 📚 详细文档
+## 分类反向同步（Notion -> Excel）
 
-- **[快速开始指南](QUICKSTART.md)** - 5 分钟上手教程
-- **[完整方案说明](SOLUTION.md)** - 架构和功能详解
-- **[Notion 设置教程](NOTION_SETUP_GUIDE.md)** - Integration 配置
-- **[Database ID 获取](GET_DATABASE_ID.md)** - ID 提取方法
+当有人在 Notion 页面修改了“分类”，可回写到本地 `projects.xlsx`：
 
-## 💡 使用示例
-
-### 示例 1: 同步单个项目
-```json
-{
-  "projects": [
-    {
-      "id": "crewai",
-      "github": "https://github.com/crewAIInc/crewAI",
-      "notion_page_id": ""
-    }
-  ]
-}
-```
-
-### 示例 2: 同步多个项目
-```json
-{
-  "projects": [
-    {
-      "id": "langchain",
-      "name": "LangChain",
-      "github": "https://github.com/langchain-ai/langchain",
-      "topics": ["ai", "llm"],
-      "notion_page_id": ""
-    },
-    {
-      "id": "autogen",
-      "name": "AutoGen",
-      "github": "https://github.com/microsoft/autogen",
-      "topics": ["ai", "agents"],
-      "notion_page_id": ""
-    }
-  ]
-}
-```
-
-## 🔧 配置说明
-
-### 环境变量
-
-| 变量名 | 必需 | 说明 |
-|--------|------|------|
-| `NOTION_TOKEN` | ✅ | Notion Integration Token |
-| `NOTION_DATABASE_ID` | ✅ | Notion 数据库 ID |
-| `GITHUB_TOKEN` | ⭐ | GitHub Token (推荐,提高 API 限制) |
-
-### projects.json 字段
-
-| 字段 | 必需 | 说明 |
-|------|------|------|
-| `id` | ✅ | 项目唯一标识 |
-| `name` | ⭐ | 项目名称 |
-| `github` | ✅ | GitHub 仓库 URL |
-| `description` | ⭐ | 项目描述 |
-| `topics` | ⭐ | 技术标签数组 |
-| `notion_page_id` | 🤖 | 自动生成,留空即可 |
-
-## 📊 Notion 数据库结构
-
-需要在 Notion 中创建以下字段:
-
-| 字段名 | 类型 | 说明 |
-|--------|------|------|
-| 项目名称 | Title | 项目名称 |
-| GitHub 链接 | URL | 仓库链接 |
-| 描述 | Text | 项目描述 |
-| Stars | Number | ⭐ 数量 |
-| Forks | Number | 🍴 数量 |
-| Watchers | Number | 👁️ 数量 |
-| Open Issues | Number | 🐛 数量 |
-| 主要语言 | Select | 编程语言 |
-| 技术标签 | Multi-select | Topics |
-| 最后更新 | Date | 更新时间 |
-| 最后推送 | Date | 推送时间 |
-| 作者 | Text | 仓库所有者 |
-| 许可证 | Select | 开源协议 |
-| 状态 | Select | 活跃状态 |
-
-## 🎨 Notion 优化建议
-
-### 创建多种视图
-- **表格视图**: 完整数据展示
-- **画廊视图**: 卡片式,按 Stars 排序
-- **看板视图**: 按技术栈分组
-
-### 添加公式字段
-```javascript
-// 活跃度
-if(dateBetween(now(), prop("最后推送"), "days") < 7, "🔥", "✅")
-
-// 热度指数
-prop("Stars") + prop("Forks") * 2
-```
-
-## 🔄 自动化
-
-### Cron (Linux/macOS)
 ```bash
-0 9 * * * cd /path/to/project && python sync.py
+# 预览（不落盘）
+python reconcile_categories_from_notion.py
+
+# 实际写入
+python reconcile_categories_from_notion.py --apply
 ```
 
-### Windows 任务计划程序
-创建计划任务,每天执行 `python sync.py`
+如果在 `.env` 中设置：
 
-## ❓ 常见问题
+```bash
+SYNC_CATEGORY_FROM_NOTION=true
+```
 
-**Q: 同步频率建议?**
-A: 每天 1-2 次即可,GitHub 数据更新不频繁。
+则 `sync.py` 在主同步前会自动执行同样的分类对齐逻辑。
 
-**Q: 支持私有仓库吗?**
-A: 支持!需要配置 GitHub Token。
+## 迁移说明（JSON -> Excel）
 
-**Q: API 限制怎么办?**
-A: 使用 GitHub Token 可将限制提升至 5000 次/小时。
+首次运行时，如果 `projects.xlsx` 不存在但同目录有旧 `projects.json`，会自动迁移生成 `projects.xlsx`。
 
-**Q: 同步会覆盖手动修改吗?**
-A: 不会,只更新 GitHub 相关字段。
+## Notion 数据库字段（最小要求）
 
-## 🛠️ 技术栈
+| 字段名 | 类型 |
+|---|---|
+| `项目名称` | Title |
+| `GitHub 链接` | URL |
+| `描述` | Rich text |
+| `Stars` | Number 或 Rich text |
+| `Stars_init` | Number（可选） |
+| `Forks` | Number |
+| `Watchers` | Number |
+| `Open Issues` | Number |
+| `主要语言` | Select |
+| `技术标签` | Multi-select |
+| `最后更新` | Date |
+| `最后推送` | Date |
+| `作者` | Rich text |
+| `许可证` | Select |
+| `状态` | Select |
+| `分类` | Select / Multi-select / Rich text |
 
-- Python 3.7+
-- requests
-- GitHub REST API v3
-- Notion API 2022-06-28
-
-## 📄 许可证
-
-MIT License
-
-## 🤝 贡献
-
-欢迎提交 Issue 和 Pull Request!
-
-## 📞 支持
-
-遇到问题?
-1. 查看 [QUICKSTART.md](QUICKSTART.md)
-2. 查看 [常见问题](#-常见问题)
-3. 提交 Issue
-
----
-
-Made with ❤️ for GitHub and Notion users
-# Notion-GitHub

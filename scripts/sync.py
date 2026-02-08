@@ -593,6 +593,28 @@ def parse_bool_env(raw_value: str, default: bool = False) -> bool:
     return default
 
 
+def resolve_projects_file_path(project_root: Path, config_file: str) -> str:
+    """解析配置文件路径,并在常见误配时回退到 data/ 目录"""
+    configured = (config_file or "").strip() or DEFAULT_CONFIG_FILENAME
+    path = Path(configured)
+    if path.is_absolute():
+        return configured
+
+    root_candidate = project_root / path
+    if root_candidate.exists():
+        return configured
+
+    # 常见误配: PROJECTS_FILE=projects.xlsx / projects.json
+    if len(path.parts) == 1:
+        data_candidate_rel = Path("data") / path.name
+        data_candidate_abs = project_root / data_candidate_rel
+        if data_candidate_abs.exists():
+            print(f"ℹ PROJECTS_FILE={configured} 未命中,自动改用 {data_candidate_rel}")
+            return str(data_candidate_rel)
+
+    return configured
+
+
 def maybe_reconcile_categories_from_notion(
     enabled: bool,
     config: Dict[str, Any],
@@ -645,7 +667,8 @@ def main():
     DATABASE_ID = os.environ.get('NOTION_DATABASE_ID', '')
     GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN', '')
     SYNC_MODE_RAW = os.environ.get('SYNC_MODE', 'all')
-    PROJECTS_FILE = os.environ.get('PROJECTS_FILE', DEFAULT_CONFIG_FILENAME)
+    PROJECTS_FILE_RAW = os.environ.get('PROJECTS_FILE', DEFAULT_CONFIG_FILENAME)
+    PROJECTS_FILE = resolve_projects_file_path(project_root, PROJECTS_FILE_RAW)
     SYNC_MODE = normalize_sync_mode(SYNC_MODE_RAW)
     SYNC_CATEGORY_FROM_NOTION = parse_bool_env(
         os.environ.get('SYNC_CATEGORY_FROM_NOTION', 'false'),

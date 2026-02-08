@@ -518,6 +518,18 @@
           "notion_page_id": "300d0e79-ce27-81c0-b736-f258305cb36e"
         },
         {
+          "id": "vibe-vibe",
+          "name": "vibe-vibe",
+          "description": "Book-style repository on vibe coding practices and workflows",
+          "github": "https://github.com/datawhalechina/vibe-vibe",
+          "topics": [
+            "book",
+            "coding",
+            "education"
+          ],
+          "notion_page_id": ""
+        },
+        {
           "id": "easy-rl",
           "name": "easy-rl",
           "description": "Educational reinforcement learning repository with book-style tutorials",
@@ -767,6 +779,18 @@
             "graph"
           ],
           "notion_page_id": "300d0e79-ce27-81a4-8bb7-d6eb9347ef22"
+        },
+        {
+          "id": "deepwiki-open",
+          "name": "deepwiki-open",
+          "description": "Open-source DeepWiki-style project for codebase analysis and understanding",
+          "github": "https://github.com/AsyncFuncAI/deepwiki-open",
+          "topics": [
+            "rag",
+            "code",
+            "analysis"
+          ],
+          "notion_page_id": ""
         }
       ]
     }

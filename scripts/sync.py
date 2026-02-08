@@ -204,8 +204,8 @@ class GitHubNotionSync:
     def load_projects_config(self, config_file: str) -> Dict:
         """加载项目配置文件"""
         try:
-            script_dir = Path(__file__).resolve().parent
-            config, resolved_path, migrated = load_projects_config_file(config_file, script_dir)
+            project_root = Path(__file__).resolve().parent.parent
+            config, resolved_path, migrated = load_projects_config_file(config_file, project_root)
             project_count = len(self.extract_projects_with_category(config))
             print(f"✓ 成功加载配置文件: {resolved_path}")
             if migrated:
@@ -222,8 +222,8 @@ class GitHubNotionSync:
     def save_projects_config(self, config: Dict, config_file: str):
         """保存项目配置文件"""
         try:
-            script_dir = Path(__file__).resolve().parent
-            saved_path = save_projects_config_file(config, config_file, script_dir)
+            project_root = Path(__file__).resolve().parent.parent
+            saved_path = save_projects_config_file(config, config_file, project_root)
             print(f"\n✓ 配置文件已更新: {saved_path}")
         except Exception as e:
             print(f"\n✗ 保存配置文件失败: {str(e)}")
@@ -606,7 +606,7 @@ def maybe_reconcile_categories_from_notion(
     if not enabled:
         return False
 
-    print("\n[预处理] 启用分类反向同步: Notion -> projects.xlsx")
+    print("\n[预处理] 启用分类反向同步: Notion -> data/projects.xlsx")
     try:
         reconciler = NotionCategoryReconciler(notion_token=notion_token)
         moved_count, created_count, skipped_count = reconcile_projects(config, reconciler)
@@ -631,9 +631,9 @@ def main():
 ╚══════════════════════════════════════════════════════════╝
     """)
     
-    # 优先加载脚本同目录下的 .env,避免受当前工作目录影响
-    script_dir = Path(__file__).resolve().parent
-    env_file = script_dir / '.env'
+    # 优先加载项目根目录下的 .env,避免受当前工作目录影响
+    project_root = Path(__file__).resolve().parent.parent
+    env_file = project_root / '.env'
     if env_file.exists():
         if load_dotenv:
             load_dotenv(dotenv_path=env_file)

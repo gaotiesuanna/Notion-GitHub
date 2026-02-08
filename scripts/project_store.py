@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-项目配置存储层: 统一读写 projects.xlsx
+项目配置存储层: 统一读写 data/projects.xlsx
 """
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ except ImportError:
     Workbook = None  # type: ignore[assignment]
     load_workbook = None  # type: ignore[assignment]
 
-DEFAULT_CONFIG_FILENAME = "projects.xlsx"
+DEFAULT_CONFIG_FILENAME = "data/projects.xlsx"
 LEGACY_JSON_FILENAME = "projects.json"
 
 CATEGORY_HEADERS = ["id", "name", "icon", "order"]

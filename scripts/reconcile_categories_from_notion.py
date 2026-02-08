@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-按 Notion 页面中的“分类”字段,回写并对齐 projects.xlsx 的 categories 结构。
+按 Notion 页面中的“分类”字段,回写并对齐 data/projects.xlsx 的 categories 结构。
 """
 
 import argparse
@@ -201,12 +201,12 @@ def reconcile_projects(
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="按 Notion 页面“分类”字段回写 projects.xlsx"
+        description="按 Notion 页面“分类”字段回写 data/projects.xlsx"
     )
     parser.add_argument(
         "--config",
         default=DEFAULT_CONFIG_FILENAME,
-        help="配置文件路径 (默认: 脚本同目录下的 projects.xlsx)",
+        help="配置文件路径 (默认: data/projects.xlsx)",
     )
     parser.add_argument(
         "--apply",
@@ -218,9 +218,9 @@ def parse_args() -> argparse.Namespace:
 
 def main():
     args = parse_args()
-    script_dir = Path(__file__).resolve().parent
+    project_root = Path(__file__).resolve().parent.parent
 
-    env_file = script_dir / ".env"
+    env_file = project_root / ".env"
     if env_file.exists():
         if load_dotenv:
             load_dotenv(dotenv_path=env_file)
@@ -234,8 +234,8 @@ def main():
 
     config_path = Path(args.config)
     if not config_path.is_absolute():
-        config_path = script_dir / config_path
-    config, resolved_path, migrated = load_projects_config_file(str(config_path), script_dir)
+        config_path = project_root / config_path
+    config, resolved_path, migrated = load_projects_config_file(str(config_path), project_root)
     if migrated:
         print("✓ 已从旧版 JSON 自动迁移为 Excel 配置")
 
@@ -257,7 +257,7 @@ def main():
         print("\n当前为 dry-run,未写入文件。使用 --apply 执行落盘。")
         return
 
-    saved_path = save_projects_config_file(config, str(resolved_path), script_dir)
+    saved_path = save_projects_config_file(config, str(resolved_path), project_root)
     print(f"\n✓ 已写入: {saved_path}")
 
 

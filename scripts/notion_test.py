@@ -23,8 +23,8 @@ def load_local_env_file(env_path: Path):
             os.environ[key] = value
 
 
-script_dir = Path(__file__).resolve().parent
-env_file = script_dir / ".env"
+project_root = Path(__file__).resolve().parent.parent
+env_file = project_root / ".env"
 if env_file.exists():
     if load_dotenv:
         load_dotenv(dotenv_path=env_file)

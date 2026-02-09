@@ -283,6 +283,44 @@ class GitHubNotionSync:
             print(f"  ✗ 获取仓库信息出错: {str(e)}")
             return None
     
+    def find_notion_page_id_by_github_url(self, github_url: str) -> Optional[str]:
+        """按 GitHub 链接回查 Notion 页面 ID"""
+        github_url = (github_url or "").strip()
+        if not github_url:
+            return None
+
+        github_link_type = self.get_property_type("GitHub 链接")
+        if github_link_type != "url":
+            # 仅在字段为 url 类型时启用精确回查,避免误匹配
+            return None
+
+        try:
+            url = f"https://api.notion.com/v1/databases/{self.database_id}/query"
+            data = {
+                "filter": {
+                    "property": "GitHub 链接",
+                    "url": {
+                        "equals": github_url
+                    }
+                },
+                "page_size": 10
+            }
+            response = self.notion_request("POST", url, json=data)
+            if response.status_code != 200:
+                print(f"  ⚠ 回查 Notion 页面失败 ({response.status_code})")
+                return None
+
+            results = response.json().get("results", [])
+            if not results:
+                return None
+
+            if len(results) > 1:
+                print(f"  ⚠ 检测到 {len(results)} 条同 GitHub 链接记录,将使用第一条")
+            return results[0].get("id")
+        except Exception as e:
+            print(f"  ⚠ 回查 Notion 页面出错: {str(e)}")
+            return None
+
     def create_notion_page(self, project: Dict, github_info: Dict, category_name: Optional[str] = None) -> Optional[str]:
         """在 Notion 数据库中创建新页面"""
         try:
@@ -388,7 +426,7 @@ class GitHubNotionSync:
             print(f"  ✗ 创建页面出错: {str(e)}")
             return None
     
-    def update_notion_page(self, page_id: str, project: Dict, github_info: Dict, category_name: Optional[str] = None) -> bool:
+    def update_notion_page(self, page_id: str, project: Dict, github_info: Dict, category_name: Optional[str] = None) -> str:
         """更新已存在的 Notion 页面"""
         try:
             url = f"https://api.notion.com/v1/pages/{page_id}"
@@ -457,16 +495,19 @@ class GitHubNotionSync:
             
             if response.status_code == 200:
                 print(f"  ✓ Notion 页面已更新")
-                return True
+                return "ok"
+            if response.status_code == 404:
+                print("  ⚠ Notion 页面不存在(可能已删除或 page_id 失效)")
+                return "not_found"
             else:
                 print(f"  ✗ 更新失败 ({response.status_code}): {response.text[:200]}")
-                return False
+                return "error"
                 
         except Exception as e:
             print(f"  ✗ 更新页面出错: {str(e)}")
-            return False
+            return "error"
     
-    def sync_project(self, project: Dict, category_name: Optional[str] = None) -> Optional[str]:
+    def sync_project(self, project: Dict, category_name: Optional[str] = None) -> Tuple[Optional[str], str]:
         """同步单个项目"""
         print(f"\n{'='*60}")
         print(f"[{project.get('id', 'unknown')}] {project.get('name', project['github'])}")
@@ -478,19 +519,32 @@ class GitHubNotionSync:
         github_info = self.get_github_repo_info(project['github'])
         if not github_info:
             print("  ⚠ 跳过此项目")
-            return project.get('notion_page_id')
+            return project.get('notion_page_id'), "skipped"
         
-        # 如果已有 page_id,则更新;否则创建新页面
+        # 优先使用本地记录的 notion_page_id;若失效/缺失则按 GitHub 链接回查
         notion_page_id = project.get('notion_page_id', '').strip()
-        
+
         if notion_page_id:
-            # 更新现有页面
-            success = self.update_notion_page(notion_page_id, project, github_info, category_name)
-            return notion_page_id if success else None
-        else:
-            # 创建新页面
-            page_id = self.create_notion_page(project, github_info, category_name)
-            return page_id
+            update_status = self.update_notion_page(notion_page_id, project, github_info, category_name)
+            if update_status == "ok":
+                return notion_page_id, "updated"
+            if update_status == "error":
+                # 非 404 错误不自动创建,避免网络抖动导致重复页面
+                return None, "failed"
+            # 仅在确认 not_found 时继续回查/创建
+
+        recovered_page_id = self.find_notion_page_id_by_github_url(github_info.get("url", project.get("github", "")))
+        if recovered_page_id:
+            print("  ✓ 已通过 GitHub 链接回查到现有 Notion 页面")
+            success = self.update_notion_page(recovered_page_id, project, github_info, category_name)
+            if success:
+                return recovered_page_id, "updated"
+
+        # 回查不到或回查后更新失败,创建新页面
+        page_id = self.create_notion_page(project, github_info, category_name)
+        if page_id:
+            return page_id, "created"
+        return None, "missing_remote"
     
     def sync_all_projects(self, config_file: str = DEFAULT_CONFIG_FILENAME, sync_mode: str = 'all'):
         """同步所有项目"""
@@ -517,6 +571,13 @@ class GitHubNotionSync:
         for i, (project, category_name) in enumerate(projects_with_category, 1):
             had_page_id = bool(project.get('notion_page_id', '').strip())
 
+            if not had_page_id:
+                recovered_page_id = self.find_notion_page_id_by_github_url(project.get('github', ''))
+                if recovered_page_id:
+                    print(f"\n[RECOVER] {project.get('id', 'unknown')} 已按 GitHub 链接补齐 notion_page_id")
+                    project['notion_page_id'] = recovered_page_id
+                    had_page_id = True
+
             if sync_mode == 'create_only' and had_page_id:
                 print(f"\n[SKIP] {project.get('id', 'unknown')} 已存在 notion_page_id,按 create_only 跳过")
                 skipped_count += 1
@@ -532,16 +593,22 @@ class GitHubNotionSync:
                 continue
             
             # 同步项目
-            page_id = self.sync_project(project, category_name)
+            page_id, action = self.sync_project(project, category_name)
             
             # 更新配置中的 page_id
             if page_id:
                 project['notion_page_id'] = page_id
-                if had_page_id:
+                if action == "updated":
                     updated_count += 1
-                else:
+                elif action == "created":
                     created_count += 1
+                else:
+                    # skipped 等情况不记入创建/更新
+                    pass
             else:
+                if action == "missing_remote":
+                    # 确认远端页面不存在且未重建成功时,清空本地脏 page_id
+                    project['notion_page_id'] = ""
                 failed_count += 1
             
             # API 限速保护

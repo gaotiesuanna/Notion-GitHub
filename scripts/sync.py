@@ -70,6 +70,43 @@ class GitHubNotionSync:
             self.github_headers["Authorization"] = f"token {github_token}"
         self._database_properties: Optional[Dict[str, Any]] = None
         self._warned_missing_category_property = False
+        self._github_url_page_index: Optional[Dict[str, List[str]]] = None
+
+    @staticmethod
+    def parse_category_name_from_properties(properties: Dict[str, Any]) -> Optional[str]:
+        """从 Notion 页面 properties 中提取“分类”字段文本值"""
+        category_prop = (properties or {}).get("分类")
+        if not category_prop:
+            return None
+
+        prop_type = category_prop.get("type")
+        if prop_type == "select":
+            select_data = category_prop.get("select") or {}
+            return (select_data.get("name") or "").strip() or None
+        if prop_type == "multi_select":
+            options = category_prop.get("multi_select") or []
+            if not options:
+                return None
+            return (options[0].get("name") or "").strip() or None
+        if prop_type == "rich_text":
+            texts = category_prop.get("rich_text") or []
+            raw = "".join((item.get("plain_text") or "") for item in texts).strip()
+            return raw or None
+        return None
+
+    @staticmethod
+    def normalize_github_url(raw_url: str) -> str:
+        """统一 GitHub 链接格式,用于稳定匹配"""
+        return (raw_url or "").strip().rstrip("/").lower()
+
+    @staticmethod
+    def slugify(text: str) -> str:
+        normalized = "".join(
+            ch if (ch.isalnum() or ch in {"-", "_"} or "\u4e00" <= ch <= "\u9fff") else "-"
+            for ch in (text or "").strip().lower()
+        )
+        normalized = "-".join(part for part in normalized.split("-") if part)
+        return normalized or "category"
 
     def notion_request(self, method: str, url: str, **kwargs):
         """Notion 请求: 代理失败时自动回退直连"""
@@ -101,6 +138,223 @@ class GitHubNotionSync:
         properties = self.get_database_properties()
         property_def = properties.get(property_name, {})
         return property_def.get("type", "")
+
+    def preload_notion_github_page_index(self) -> Dict[str, List[str]]:
+        """
+        预加载 Notion 数据库中全部 GitHub 链接 -> page_id 索引。
+        用于 create_only / update_only 快速判定,避免逐条远程回查。
+        """
+        if self._github_url_page_index is not None:
+            return self._github_url_page_index
+
+        index: Dict[str, List[str]] = {}
+        github_link_type = self.get_property_type("GitHub 链接")
+        if github_link_type != "url":
+            self._github_url_page_index = index
+            return index
+
+        print("预检 Notion 现有页面索引...")
+        query_url = f"https://api.notion.com/v1/databases/{self.database_id}/query"
+        start_cursor: Optional[str] = None
+        fetched_pages = 0
+
+        try:
+            while True:
+                payload: Dict[str, Any] = {"page_size": 100}
+                if start_cursor:
+                    payload["start_cursor"] = start_cursor
+
+                response = self.notion_request("POST", query_url, json=payload)
+                if response.status_code != 200:
+                    print(f"  ⚠ 预检索引失败 ({response.status_code}),将回退逐条回查")
+                    break
+
+                data = response.json()
+                results = data.get("results", [])
+                fetched_pages += len(results)
+                for item in results:
+                    page_id = item.get("id")
+                    properties = item.get("properties", {})
+                    github_prop = properties.get("GitHub 链接", {})
+                    github_url = self.normalize_github_url(github_prop.get("url", ""))
+                    if not page_id or not github_url:
+                        continue
+                    index.setdefault(github_url, []).append(page_id)
+
+                if not data.get("has_more"):
+                    break
+                start_cursor = data.get("next_cursor")
+                if not start_cursor:
+                    break
+        except Exception as e:
+            print(f"  ⚠ 预检索引出错: {str(e)},将回退逐条回查")
+
+        self._github_url_page_index = index
+        print(
+            f"  ✓ 索引完成: 扫描 {fetched_pages} 页记录,可匹配 GitHub 链接 {len(index)} 条"
+        )
+        return index
+
+    def fetch_notion_github_records(self) -> Dict[str, List[Dict[str, str]]]:
+        """
+        扫描 Notion 数据库,返回:
+        github_url(normalized) -> [{page_id, category_name}]
+        """
+        records: Dict[str, List[Dict[str, str]]] = {}
+        github_link_type = self.get_property_type("GitHub 链接")
+        if github_link_type != "url":
+            print("  ⚠ Notion 的“GitHub 链接”字段不是 url 类型,无法执行本地回写校正")
+            return records
+
+        print("从 Notion 拉取项目索引(含分类)...")
+        query_url = f"https://api.notion.com/v1/databases/{self.database_id}/query"
+        start_cursor: Optional[str] = None
+        fetched_pages = 0
+
+        while True:
+            payload: Dict[str, Any] = {"page_size": 100}
+            if start_cursor:
+                payload["start_cursor"] = start_cursor
+
+            response = self.notion_request("POST", query_url, json=payload)
+            if response.status_code != 200:
+                print(f"  ⚠ 拉取 Notion 索引失败 ({response.status_code})")
+                break
+
+            data = response.json()
+            results = data.get("results", [])
+            fetched_pages += len(results)
+            for item in results:
+                page_id = (item or {}).get("id", "")
+                properties = (item or {}).get("properties", {})
+                github_prop = properties.get("GitHub 链接", {})
+                github_url = self.normalize_github_url(github_prop.get("url", ""))
+                if not page_id or not github_url:
+                    continue
+                category_name = self.parse_category_name_from_properties(properties) or ""
+                records.setdefault(github_url, []).append(
+                    {
+                        "page_id": page_id,
+                        "category_name": category_name,
+                    }
+                )
+
+            if not data.get("has_more"):
+                break
+            start_cursor = data.get("next_cursor")
+            if not start_cursor:
+                break
+
+        print(f"  ✓ 拉取完成: 扫描 {fetched_pages} 页记录,命中 GitHub 链接 {len(records)} 条")
+        return records
+
+    def ensure_category_in_config(self, config: Dict[str, Any], category_name: str) -> Dict[str, Any]:
+        """确保配置中存在指定分类(按 name 匹配)"""
+        categories = config.setdefault("categories", [])
+        for category in categories:
+            if category.get("name") == category_name:
+                category.setdefault("projects", [])
+                return category
+
+        existing_ids = {str(c.get("id", "")).strip() for c in categories}
+        base_id = self.slugify(category_name)
+        candidate = base_id
+        i = 2
+        while candidate in existing_ids:
+            candidate = f"{base_id}-{i}"
+            i += 1
+
+        category = {
+            "id": candidate,
+            "name": category_name,
+            "icon": "📁",
+            "projects": [],
+        }
+        categories.append(category)
+        return category
+
+    def reconcile_local_ids_and_categories_from_notion(self, config: Dict[str, Any]) -> Dict[str, int]:
+        """
+        从 Notion 拉取并回写本地:
+        - notion_page_id
+        - 分类
+        规则:
+        - 若本地 notion_page_id 与 Notion(按 GitHub 链接匹配到的 page_id)不一致,仅清空 notion_page_id
+        - 条目始终保留,不删除
+        """
+        stats = {
+            "filled_page_id": 0,
+            "cleared_page_id": 0,
+            "moved_category": 0,
+            "created_category": 0,
+            "no_match": 0,
+            "duplicate_in_notion": 0,
+        }
+
+        records = self.fetch_notion_github_records()
+        categories = config.get("categories", [])
+        if not isinstance(categories, list):
+            return stats
+
+        # 快照遍历,避免移动项目时影响迭代
+        snapshot: List[Dict[str, Any]] = []
+        for category in categories:
+            for project in category.get("projects", []):
+                if isinstance(project, dict):
+                    snapshot.append(project)
+
+        for project in snapshot:
+            github_url = self.normalize_github_url(project.get("github", ""))
+            if not github_url:
+                continue
+
+            matched = records.get(github_url, [])
+            if not matched:
+                if (project.get("notion_page_id") or "").strip():
+                    project["notion_page_id"] = ""
+                    stats["cleared_page_id"] += 1
+                stats["no_match"] += 1
+                continue
+
+            if len(matched) > 1:
+                stats["duplicate_in_notion"] += 1
+            remote_page_id = (matched[0].get("page_id") or "").strip()
+            remote_category_name = (matched[0].get("category_name") or "").strip()
+
+            local_page_id = (project.get("notion_page_id") or "").strip()
+            if local_page_id and local_page_id != remote_page_id:
+                project["notion_page_id"] = ""
+                stats["cleared_page_id"] += 1
+            elif not local_page_id and remote_page_id:
+                project["notion_page_id"] = remote_page_id
+                stats["filled_page_id"] += 1
+
+            if remote_category_name:
+                source_category = None
+                source_index = -1
+                for category in categories:
+                    projects = category.get("projects", [])
+                    for idx, item in enumerate(projects):
+                        if item is project:
+                            source_category = category
+                            source_index = idx
+                            break
+                    if source_category:
+                        break
+
+                if source_category and source_category.get("name") != remote_category_name:
+                    before_count = len(categories)
+                    target_category = self.ensure_category_in_config(config, remote_category_name)
+                    if len(categories) > before_count:
+                        stats["created_category"] += 1
+
+                    target_projects = target_category.setdefault("projects", [])
+                    if not any(item is project for item in target_projects):
+                        moving_project = source_category.get("projects", []).pop(source_index)
+                        target_projects.append(moving_project)
+                        stats["moved_category"] += 1
+
+        return stats
 
     def build_stars_property(self, stars: int) -> Dict[str, Any]:
         """根据数据库字段类型构建 Stars 属性值"""
@@ -288,6 +542,15 @@ class GitHubNotionSync:
         github_url = (github_url or "").strip()
         if not github_url:
             return None
+
+        normalized_url = self.normalize_github_url(github_url)
+        if self._github_url_page_index is not None:
+            page_ids = self._github_url_page_index.get(normalized_url, [])
+            if not page_ids:
+                return None
+            if len(page_ids) > 1:
+                print(f"  ⚠ 检测到 {len(page_ids)} 条同 GitHub 链接记录,将使用第一条")
+            return page_ids[0]
 
         github_link_type = self.get_property_type("GitHub 链接")
         if github_link_type != "url":
@@ -562,13 +825,57 @@ class GitHubNotionSync:
             return
         
         print(f"开始同步 {len(projects_with_category)} 个项目...\n")
-        
+
+        if sync_mode in {'create_only', 'update_only'}:
+            self.preload_notion_github_page_index()
+
+        projects_to_sync = projects_with_category
         updated_count = 0
         created_count = 0
         failed_count = 0
         skipped_count = 0
-        
-        for i, (project, category_name) in enumerate(projects_with_category, 1):
+
+        if sync_mode == 'create_only':
+            pending: List[Tuple[Dict[str, Any], Optional[str]]] = []
+            recovered_count = 0
+            for project, category_name in projects_with_category:
+                had_page_id = bool(project.get('notion_page_id', '').strip())
+                if not had_page_id:
+                    recovered_page_id = self.find_notion_page_id_by_github_url(project.get('github', ''))
+                    if recovered_page_id:
+                        project['notion_page_id'] = recovered_page_id
+                        had_page_id = True
+                        recovered_count += 1
+                if had_page_id:
+                    skipped_count += 1
+                else:
+                    pending.append((project, category_name))
+            projects_to_sync = pending
+            print(f"create_only 预检: 待创建 {len(projects_to_sync)} 个,已存在 {skipped_count} 个")
+            if recovered_count > 0:
+                print(f"  ✓ 其中按 GitHub 链接补齐 notion_page_id: {recovered_count} 个")
+
+        elif sync_mode == 'update_only':
+            pending = []
+            recovered_count = 0
+            for project, category_name in projects_with_category:
+                had_page_id = bool(project.get('notion_page_id', '').strip())
+                if not had_page_id:
+                    recovered_page_id = self.find_notion_page_id_by_github_url(project.get('github', ''))
+                    if recovered_page_id:
+                        project['notion_page_id'] = recovered_page_id
+                        had_page_id = True
+                        recovered_count += 1
+                if had_page_id:
+                    pending.append((project, category_name))
+                else:
+                    skipped_count += 1
+            projects_to_sync = pending
+            print(f"update_only 预检: 待更新 {len(projects_to_sync)} 个,缺少 page_id 跳过 {skipped_count} 个")
+            if recovered_count > 0:
+                print(f"  ✓ 其中按 GitHub 链接补齐 notion_page_id: {recovered_count} 个")
+
+        for i, (project, category_name) in enumerate(projects_to_sync, 1):
             had_page_id = bool(project.get('notion_page_id', '').strip())
 
             if not had_page_id:
@@ -612,7 +919,7 @@ class GitHubNotionSync:
                 failed_count += 1
             
             # API 限速保护
-            if i < len(projects_with_category):
+            if i < len(projects_to_sync):
                 time.sleep(1)
         
         # 保存更新后的配置
@@ -630,22 +937,28 @@ class GitHubNotionSync:
         print("="*60 + "\n")
 
 
+SYNC_MODE_ALIASES = {
+    "all": "all",
+    "full": "all",
+    "both": "all",
+    "create_only": "create_only",
+    "create": "create_only",
+    "new_only": "create_only",
+    "only_create": "create_only",
+    "update_only": "update_only",
+    "update": "update_only",
+    "only_update": "update_only",
+    "reconcile_only": "reconcile_only",
+    "pull_from_notion": "reconcile_only",
+    "notion_pull": "reconcile_only",
+    "reconcile": "reconcile_only",
+}
+
+
 def normalize_sync_mode(raw_mode: str) -> str:
     """标准化 SYNC_MODE,非法值回退为 all"""
     mode = (raw_mode or "all").strip().lower()
-    aliases = {
-        "all": "all",
-        "full": "all",
-        "both": "all",
-        "create_only": "create_only",
-        "create": "create_only",
-        "new_only": "create_only",
-        "only_create": "create_only",
-        "update_only": "update_only",
-        "update": "update_only",
-        "only_update": "update_only",
-    }
-    return aliases.get(mode, "all")
+    return SYNC_MODE_ALIASES.get(mode, "all")
 
 
 def parse_bool_env(raw_value: str, default: bool = False) -> bool:
@@ -755,7 +1068,7 @@ def main():
         print("  export NOTION_DATABASE_ID='your-database-id'\n")
         return
 
-    if SYNC_MODE != (SYNC_MODE_RAW or 'all').strip().lower():
+    if (SYNC_MODE_RAW or "all").strip().lower() not in SYNC_MODE_ALIASES:
         print(f"⚠ SYNC_MODE={SYNC_MODE_RAW!r} 无效,已回退为默认模式 all")
     
     # 创建同步器
@@ -774,8 +1087,28 @@ def main():
         notion_token=NOTION_TOKEN,
         config_file=config_file,
     )
+
+    if SYNC_MODE == "reconcile_only":
+        print("\n[模式] reconcile_only: 仅从 Notion 拉取并回写 notion_page_id + 分类")
+        stats = syncer.reconcile_local_ids_and_categories_from_notion(config)
+        print(
+            "[模式] 回写结果: "
+            f"补齐 notion_page_id {stats['filled_page_id']} 项, "
+            f"清空 notion_page_id {stats['cleared_page_id']} 项, "
+            f"分类移动 {stats['moved_category']} 项, "
+            f"新增分类 {stats['created_category']} 个, "
+            f"Notion 未匹配 {stats['no_match']} 项"
+        )
+        if stats["duplicate_in_notion"] > 0:
+            print(f"[模式] ⚠ 检测到 Notion 同链接重复记录: {stats['duplicate_in_notion']} 项(已取第一条)")
+        config_changed = True
+
     if config_changed:
         syncer.save_projects_config(config, config_file)
+
+    if SYNC_MODE == "reconcile_only":
+        print(f"提示: 已完成本地回写,未执行创建/更新同步。配置文件: {config_file}\n")
+        return
     
     # 执行同步
     syncer.sync_all_projects(config_file, sync_mode=SYNC_MODE)

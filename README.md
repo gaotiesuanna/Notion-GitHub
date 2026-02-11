@@ -17,7 +17,7 @@
 
 - 自动同步 GitHub 仓库信息到 Notion
 - 同步 Stars、Forks、Watchers、Issues、Topics 等字段
-- 支持 `create_only` / `update_only` / `all` 三种模式
+- 支持 `create_only` / `update_only` / `all` / `reconcile_only` 四种模式
 - 支持按 Notion 的“分类”字段反向对齐本地分类（可选）
 - 配置文件使用 Excel（`data/projects.xlsx`）
 
@@ -67,7 +67,7 @@ make install
 | `NOTION_DATABASE_ID` | 是 | Notion 数据库 ID |
 | `GITHUB_TOKEN` | 否 | GitHub Token（推荐） |
 | `PROJECTS_FILE` | 否 | 配置文件路径，默认 `data/projects.xlsx` |
-| `SYNC_MODE` | 否 | `all` / `create_only` / `update_only` |
+| `SYNC_MODE` | 否 | `all` / `create_only` / `update_only` / `reconcile_only` |
 | `SYNC_CATEGORY_FROM_NOTION` | 否 | `true/false`，是否先执行分类反向同步 |
 
 ### 3. 维护 `data/projects.xlsx`
@@ -107,6 +107,15 @@ make sync
 ```bash
 python scripts/sync.py
 ```
+
+### `SYNC_MODE` 说明
+
+- `all`：创建或更新（默认）
+- `create_only`：仅创建本地尚未绑定 Notion 页面（会先预检，减少逐条跳过）
+- `update_only`：仅更新已绑定 Notion 页面
+- `reconcile_only`：只从 Notion 拉取并回写本地 `notion_page_id` 与分类，不执行创建/更新
+  - 若本地 `notion_page_id` 与 Notion 中按 `GitHub 链接` 匹配出的页面 ID 不一致：仅清空本地 `notion_page_id`
+  - 项目条目会保留，不会删除
 
 ## 分类反向同步（Notion -> Excel）
 

@@ -1,0 +1,21 @@
+{"claudeCode.preferredLocation": "panel",
+"claudeCode.environmentVariables": [
+      {
+            "name": "ANTHROPIC_BASE_URL",
+            "value": "http://192.168.5.39:4000"
+        },
+        {
+            "name": "API_TIMEOUT_MS",
+            "value": "3000000"
+        },
+        {
+            "name": "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC",
+            "value": "1"
+        },
+        {
+            "name": "ANTHROPIC_AUTH_TOKEN",
+            "value": "sk-change-this-to-a-strong-random-key"
+        }
+    ],
+"claudeCode.allowDangerouslySkipPermissions":true,"claudeCode.disableLoginPrompt":true
+}

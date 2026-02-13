@@ -32,10 +32,13 @@ if env_file.exists():
         load_local_env_file(env_file)
 
 notion_token = os.environ.get("NOTION_TOKEN", "").strip()
-database_id = os.environ.get("NOTION_DATABASE_ID", "").strip()
+database_id = (
+    os.environ.get("NOTION_PROJECTS_DATABASE_ID", "").strip()
+    or os.environ.get("NOTION_DATABASE_ID", "").strip()
+)
 
 if not notion_token or not database_id:
-    print("❌ 缺少环境变量: NOTION_TOKEN / NOTION_DATABASE_ID")
+    print("❌ 缺少环境变量: NOTION_TOKEN / NOTION_PROJECTS_DATABASE_ID (或 NOTION_DATABASE_ID)")
     raise SystemExit(1)
 
 headers = {

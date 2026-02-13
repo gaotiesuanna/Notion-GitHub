@@ -64,7 +64,9 @@ make install
 | 变量名 | 必需 | 说明 |
 |---|---|---|
 | `NOTION_TOKEN` | 是 | Notion Integration Token |
-| `NOTION_DATABASE_ID` | 是 | Notion 数据库 ID |
+| `NOTION_PROJECTS_DATABASE_ID` | 是（推荐） | Projects 同步使用的 Notion 数据库 ID |
+| `NOTION_PAPERS_DATABASE_ID` | 否 | Papers 数据库 ID（给论文脚本使用） |
+| `NOTION_DATABASE_ID` | 否 | 旧变量，作为回退兼容 |
 | `GITHUB_TOKEN` | 否 | GitHub Token（推荐） |
 | `PROJECTS_FILE` | 否 | 配置文件路径，默认 `data/projects.xlsx` |
 | `SYNC_MODE` | 否 | `all` / `create_only` / `update_only` / `reconcile_only` |

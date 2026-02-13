@@ -1044,7 +1044,7 @@ def main():
 
     # 从环境变量读取配置
     NOTION_TOKEN = os.environ.get('NOTION_TOKEN', '')
-    DATABASE_ID = os.environ.get('NOTION_DATABASE_ID', '')
+    DATABASE_ID = os.environ.get('NOTION_PROJECTS_DATABASE_ID', '').strip()
     GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN', '')
     SYNC_MODE_RAW = os.environ.get('SYNC_MODE', 'all')
     PROJECTS_FILE_RAW = os.environ.get('PROJECTS_FILE', DEFAULT_CONFIG_FILENAME)
@@ -1063,9 +1063,9 @@ def main():
         return
     
     if not DATABASE_ID:
-        print("❌ 错误: 未设置 NOTION_DATABASE_ID\n")
+        print("❌ 错误: 未设置 NOTION_PROJECTS_DATABASE_ID\n")
         print("请设置环境变量:")
-        print("  export NOTION_DATABASE_ID='your-database-id'\n")
+        print("  export NOTION_PROJECTS_DATABASE_ID='your-projects-database-id'\n")
         return
 
     if (SYNC_MODE_RAW or "all").strip().lower() not in SYNC_MODE_ALIASES:

@@ -4,7 +4,7 @@
 
 需要以下信息：
 - `NOTION_TOKEN`
-- `NOTION_DATABASE_ID`
+- `NOTION_PROJECTS_DATABASE_ID`（推荐，旧版可用 `NOTION_DATABASE_ID`）
 - （可选）`GITHUB_TOKEN`
 
 ## 2) 安装依赖
@@ -29,7 +29,11 @@ cp .env.example .env
 
 ```bash
 NOTION_TOKEN=your_notion_token
-NOTION_DATABASE_ID=your_database_id
+NOTION_PROJECTS_DATABASE_ID=your_projects_database_id
+# 可选：兼容旧变量
+# NOTION_DATABASE_ID=your_legacy_database_id
+# 可选：论文数据库
+# NOTION_PAPERS_DATABASE_ID=your_papers_database_id
 GITHUB_TOKEN=your_github_token_optional
 PROJECTS_FILE=data/projects.xlsx
 SYNC_MODE=all

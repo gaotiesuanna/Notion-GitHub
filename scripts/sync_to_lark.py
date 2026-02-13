@@ -17,7 +17,7 @@ def get_env(key: str):
 
 # 获取环境变量
 notion_token = get_env("NOTION_TOKEN")
-notion_database_id = get_env("NOTION_DATABASE_ID")
+notion_database_id = os.getenv("NOTION_PROJECTS_DATABASE_ID") or get_env("NOTION_DATABASE_ID")
 lark_app_id = get_env("LARK_APP_ID")
 lark_app_secret = get_env("LARK_APP_SECRET")
 lark_sheet_token = get_env("LARK_SHEET_TOKEN")  # 电子表格token: MUQPsNc71hX0NJty5iOcf6d6nqd

@@ -4,6 +4,7 @@
 
 特性：
 - 支持 all / create_only / update_only 三种模式
+- 默认先从 Notion 拉取并合并到本地（支持你在 Notion 先新建条目）
 - 支持从 arXiv 链接自动提取 arXiv ID
 - 可用 arXiv API 自动补齐标题、作者、年份（默认只补空字段）
 - 同步后回写 notion_page_id 到 Excel
@@ -130,6 +131,13 @@ def split_csv_like(raw: Any) -> List[str]:
 def slugify(text: str) -> str:
     value = re.sub(r"[^a-zA-Z0-9\u4e00-\u9fff]+", "-", (text or "").strip().lower()).strip("-")
     return value or "paper"
+
+
+def normalize_url(url: str) -> str:
+    value = (url or "").strip()
+    if not value:
+        return ""
+    return value.rstrip("/")
 
 
 def parse_arxiv_id(*values: str) -> str:
@@ -517,6 +525,141 @@ class PaperNotionSync:
             return []
         return response.json().get("results", [])
 
+    def query_all_pages(self, page_size: int = 100) -> List[Dict[str, Any]]:
+        all_results: List[Dict[str, Any]] = []
+        next_cursor: Optional[str] = None
+        url = f"https://api.notion.com/v1/databases/{self.database_id}/query"
+        while True:
+            body: Dict[str, Any] = {"page_size": page_size}
+            if next_cursor:
+                body["start_cursor"] = next_cursor
+            response = self.notion_request("POST", url, json=body)
+            if response is None or response.status_code != 200:
+                break
+            payload = response.json()
+            all_results.extend(payload.get("results") or [])
+            if not payload.get("has_more"):
+                break
+            next_cursor = payload.get("next_cursor")
+            if not next_cursor:
+                break
+        return all_results
+
+    def _extract_plain_text(self, rich_items: Any) -> str:
+        if not isinstance(rich_items, list):
+            return ""
+        return "".join((item.get("plain_text") or "") for item in rich_items if isinstance(item, dict)).strip()
+
+    def _extract_text_property(self, properties: Dict[str, Any], name: str) -> str:
+        prop = properties.get(name) or {}
+        if not isinstance(prop, dict):
+            return ""
+        ptype = prop.get("type")
+        if ptype == "title":
+            return self._extract_plain_text(prop.get("title"))
+        if ptype == "rich_text":
+            return self._extract_plain_text(prop.get("rich_text"))
+        if ptype == "select":
+            return ((prop.get("select") or {}).get("name") or "").strip()
+        if ptype == "url":
+            return str(prop.get("url") or "").strip()
+        if ptype == "number":
+            value = prop.get("number")
+            return str(value) if value is not None else ""
+        return ""
+
+    def _extract_url_property(self, properties: Dict[str, Any], name: str) -> str:
+        prop = properties.get(name) or {}
+        if not isinstance(prop, dict):
+            return ""
+        if prop.get("type") == "url":
+            return str(prop.get("url") or "").strip()
+        return self._extract_text_property(properties, name)
+
+    def _extract_number_property(self, properties: Dict[str, Any], name: str) -> Optional[int]:
+        prop = properties.get(name) or {}
+        if not isinstance(prop, dict):
+            return None
+        if prop.get("type") == "number":
+            value = prop.get("number")
+            if isinstance(value, (int, float)):
+                return int(value)
+            return None
+        raw = self._extract_text_property(properties, name)
+        if raw.isdigit():
+            return int(raw)
+        return None
+
+    def _extract_select_property(self, properties: Dict[str, Any], name: str) -> str:
+        prop = properties.get(name) or {}
+        if not isinstance(prop, dict):
+            return ""
+        ptype = prop.get("type")
+        if ptype == "select":
+            return ((prop.get("select") or {}).get("name") or "").strip()
+        if ptype == "multi_select":
+            options = prop.get("multi_select") or []
+            if options:
+                return str((options[0] or {}).get("name") or "").strip()
+            return ""
+        return self._extract_text_property(properties, name)
+
+    def _extract_multi_select_property(self, properties: Dict[str, Any], name: str) -> List[str]:
+        prop = properties.get(name) or {}
+        if not isinstance(prop, dict):
+            return []
+        ptype = prop.get("type")
+        if ptype == "multi_select":
+            values = [str((item or {}).get("name") or "").strip() for item in (prop.get("multi_select") or [])]
+            return [v for v in values if v]
+        text = self._extract_text_property(properties, name)
+        return split_csv_like(text)
+
+    def parse_notion_paper(self, page: Dict[str, Any]) -> Tuple[Dict[str, Any], str]:
+        properties = page.get("properties") or {}
+        category_name = self._extract_select_property(properties, "分类") or "未分类"
+        paper_url = self._extract_url_property(properties, "论文链接")
+        pdf_url = self._extract_url_property(properties, "PDF链接")
+        arxiv_id = parse_arxiv_id(
+            self._extract_text_property(properties, "arXiv ID"),
+            paper_url,
+            pdf_url,
+        )
+        title = self._extract_text_property(properties, "标题")
+        doi = self._extract_text_property(properties, "DOI")
+        page_id = normalize_notion_id(page.get("id", ""))
+        paper_id = slugify(arxiv_id or doi or title or paper_url or page_id)
+        return {
+            "category_id": slugify(category_name),
+            "id": paper_id,
+            "title": title,
+            "authors": split_csv_like(self._extract_text_property(properties, "作者")),
+            "venue": self._extract_select_property(properties, "会议/期刊"),
+            "year": self._extract_number_property(properties, "年份"),
+            "paper_url": paper_url,
+            "pdf_url": pdf_url,
+            "code_url": self._extract_url_property(properties, "Code链接"),
+            "doi": doi,
+            "arxiv_id": arxiv_id,
+            "keywords": self._extract_multi_select_property(properties, "关键词"),
+            "status": self._extract_select_property(properties, "状态"),
+            "rating": self._extract_number_property(properties, "评分"),
+            "notes": self._extract_text_property(properties, "笔记"),
+            "notion_page_id": page_id,
+        }, category_name
+
+    def fetch_notion_papers(self) -> List[Tuple[Dict[str, Any], str]]:
+        pages = self.query_all_pages(page_size=100)
+        rows: List[Tuple[Dict[str, Any], str]] = []
+        for page in pages:
+            if page.get("object") != "page":
+                continue
+            paper, category_name = self.parse_notion_paper(page)
+            if not any([paper.get("paper_url"), paper.get("arxiv_id"), paper.get("doi"), paper.get("title")]):
+                continue
+            rows.append((paper, category_name))
+        return rows
+
     def find_existing_page_id(self, paper: Dict[str, Any]) -> Optional[str]:
         arxiv_id = (paper.get("arxiv_id") or "").strip()
         doi = (paper.get("doi") or "").strip()
@@ -615,6 +758,160 @@ def flatten_papers(config: Dict[str, Any]) -> List[Tuple[Dict[str, Any], str]]:
     return rows
 
 
+def ensure_category(config: Dict[str, Any], category_name: str) -> Dict[str, Any]:
+    target_name = (category_name or "").strip() or "未分类"
+    categories = config.setdefault("categories", [])
+    for category in categories:
+        if str(category.get("name") or "").strip() == target_name:
+            category.setdefault("papers", [])
+            return category
+
+    existing_ids = {str(c.get("id") or "").strip() for c in categories}
+    base_id = slugify(target_name)
+    candidate = base_id
+    suffix = 2
+    while candidate in existing_ids:
+        candidate = f"{base_id}-{suffix}"
+        suffix += 1
+
+    category = {"id": candidate, "name": target_name, "icon": "📚", "order": len(categories), "papers": []}
+    categories.append(category)
+    return category
+
+
+def fill_paper_missing_fields(target: Dict[str, Any], source: Dict[str, Any]) -> int:
+    changed = 0
+    scalar_fields = [
+        "id",
+        "title",
+        "venue",
+        "year",
+        "paper_url",
+        "pdf_url",
+        "code_url",
+        "doi",
+        "arxiv_id",
+        "status",
+        "rating",
+        "notes",
+        "notion_page_id",
+    ]
+    list_fields = ["authors", "keywords"]
+
+    for field in scalar_fields:
+        current = target.get(field)
+        incoming = source.get(field)
+        if current in (None, "", []):
+            if incoming not in (None, "", []):
+                target[field] = incoming
+                changed += 1
+
+    for field in list_fields:
+        current_list = target.get(field) or []
+        incoming_list = source.get(field) or []
+        if (not current_list) and incoming_list:
+            target[field] = incoming_list
+            changed += 1
+    return changed
+
+
+def merge_notion_papers_into_config(
+    config: Dict[str, Any],
+    notion_rows: List[Tuple[Dict[str, Any], str]],
+) -> Dict[str, int]:
+    stats = {
+        "total_notion": len(notion_rows),
+        "inserted": 0,
+        "merged": 0,
+        "filled_fields": 0,
+        "moved_category": 0,
+        "new_categories": 0,
+    }
+    if not notion_rows:
+        return stats
+
+    categories = config.setdefault("categories", [])
+    for category in categories:
+        category.setdefault("papers", [])
+
+    def make_index() -> Dict[str, Dict[str, Any]]:
+        idx: Dict[str, Dict[str, Any]] = {}
+        for category in config.get("categories", []):
+            for paper in category.get("papers", []):
+                page_id = normalize_notion_id(str(paper.get("notion_page_id") or ""))
+                arxiv_id = str(paper.get("arxiv_id") or "").strip()
+                doi = str(paper.get("doi") or "").strip().lower()
+                paper_url = normalize_url(str(paper.get("paper_url") or "")).lower()
+                paper_id = str(paper.get("id") or "").strip().lower()
+                if page_id:
+                    idx[f"page:{page_id}"] = paper
+                if arxiv_id:
+                    idx[f"arxiv:{arxiv_id}"] = paper
+                if doi:
+                    idx[f"doi:{doi}"] = paper
+                if paper_url:
+                    idx[f"url:{paper_url}"] = paper
+                if paper_id:
+                    idx[f"id:{paper_id}"] = paper
+        return idx
+
+    def locate_category_for_paper(target_paper: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        for category in config.get("categories", []):
+            for paper in category.get("papers", []):
+                if paper is target_paper:
+                    return category
+        return None
+
+    index = make_index()
+    for notion_paper, notion_category_name in notion_rows:
+        page_id = normalize_notion_id(str(notion_paper.get("notion_page_id") or ""))
+        arxiv_id = str(notion_paper.get("arxiv_id") or "").strip()
+        doi = str(notion_paper.get("doi") or "").strip().lower()
+        paper_url = normalize_url(str(notion_paper.get("paper_url") or "")).lower()
+        paper_id = str(notion_paper.get("id") or "").strip().lower()
+        keys = []
+        if page_id:
+            keys.append(f"page:{page_id}")
+        if arxiv_id:
+            keys.append(f"arxiv:{arxiv_id}")
+        if doi:
+            keys.append(f"doi:{doi}")
+        if paper_url:
+            keys.append(f"url:{paper_url}")
+        if paper_id:
+            keys.append(f"id:{paper_id}")
+
+        existing = next((index[k] for k in keys if k in index), None)
+        if existing is None:
+            before_count = len(config.get("categories", []))
+            target_category = ensure_category(config, notion_category_name)
+            if len(config.get("categories", [])) > before_count:
+                stats["new_categories"] += 1
+            target_category.setdefault("papers", []).append(notion_paper)
+            stats["inserted"] += 1
+            index = make_index()
+            continue
+
+        stats["merged"] += 1
+        stats["filled_fields"] += fill_paper_missing_fields(existing, notion_paper)
+        if page_id:
+            existing["notion_page_id"] = page_id
+
+        if notion_category_name:
+            current_category = locate_category_for_paper(existing)
+            target_category = ensure_category(config, notion_category_name)
+            if current_category is not None and current_category is not target_category:
+                source_list = current_category.get("papers", [])
+                target_list = target_category.setdefault("papers", [])
+                source_index = next((i for i, p in enumerate(source_list) if p is existing), -1)
+                if source_index >= 0:
+                    source_list.pop(source_index)
+                    target_list.append(existing)
+                    stats["moved_category"] += 1
+        index = make_index()
+    return stats
+
+
 def main() -> None:
     project_root = Path(__file__).resolve().parent.parent
     env_file = project_root / ".env"
@@ -629,6 +926,7 @@ def main() -> None:
     papers_file = os.environ.get("PAPERS_FILE", DEFAULT_PAPERS_FILE).strip() or DEFAULT_PAPERS_FILE
     sync_mode = normalize_sync_mode(os.environ.get("SYNC_MODE", "all"))
     force_arxiv_title = parse_bool_env(os.environ.get("FORCE_ARXIV_TITLE", "false"), default=False)
+    sync_from_notion_first = parse_bool_env(os.environ.get("SYNC_FROM_NOTION_FIRST", "true"), default=True)
 
     if not notion_token:
         print("❌ 未设置 NOTION_TOKEN")
@@ -642,18 +940,35 @@ def main() -> None:
 
     config_path = project_root / papers_file if not Path(papers_file).is_absolute() else Path(papers_file)
     config = load_papers_config(config_path)
-    papers_with_category = flatten_papers(config)
-    if not papers_with_category:
-        print(f"⚠ 没有论文记录，请先编辑 {config_path}")
-        return
 
     syncer = PaperNotionSync(
         notion_token=notion_token,
         database_id=database_id,
         force_arxiv_title=force_arxiv_title,
     )
+
+    if sync_from_notion_first:
+        notion_rows = syncer.fetch_notion_papers()
+        merge_stats = merge_notion_papers_into_config(config, notion_rows)
+        print(
+            "Notion 拉取: "
+            f"{merge_stats['total_notion']} 条, "
+            f"新增本地 {merge_stats['inserted']} 条, "
+            f"合并 {merge_stats['merged']} 条, "
+            f"补字段 {merge_stats['filled_fields']} 处, "
+            f"移动分类 {merge_stats['moved_category']} 条"
+        )
+        if merge_stats["new_categories"]:
+            print(f"  + 新建分类: {merge_stats['new_categories']} 个")
+
+    papers_with_category = flatten_papers(config)
+    if not papers_with_category:
+        print(f"⚠ 本地和 Notion 都没有可同步论文，请先编辑 {config_path} 或在 Notion 新建条目")
+        return
+
     print(f"开始同步论文: {len(papers_with_category)} 条，模式: {sync_mode}")
     print(f"标题覆盖: {'开启' if force_arxiv_title else '关闭'} (FORCE_ARXIV_TITLE)")
+    print(f"预拉取 Notion: {'开启' if sync_from_notion_first else '关闭'} (SYNC_FROM_NOTION_FIRST)")
 
     created = 0
     updated = 0
@@ -663,8 +978,18 @@ def main() -> None:
     for idx, (paper, category_name) in enumerate(papers_with_category, 1):
         has_page_id = bool((paper.get("notion_page_id") or "").strip())
         if sync_mode == "create_only" and has_page_id:
-            skipped += 1
-            continue
+            # create_only 下允许“信息不完整”的已绑定条目执行一次更新,用于回填 Notion 新增简略条目
+            missing_core = any(
+                [
+                    not (paper.get("title") or "").strip(),
+                    not (paper.get("authors") or []),
+                    not paper.get("year"),
+                    not (paper.get("arxiv_id") or "").strip(),
+                ]
+            )
+            if not missing_core:
+                skipped += 1
+                continue
         if sync_mode == "update_only" and not has_page_id:
             skipped += 1
             continue

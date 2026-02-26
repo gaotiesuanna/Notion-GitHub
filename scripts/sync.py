@@ -108,6 +108,17 @@ class GitHubNotionSync:
         normalized = "-".join(part for part in normalized.split("-") if part)
         return normalized or "category"
 
+    @staticmethod
+    def normalize_notion_page_id(raw_page_id: str) -> str:
+        return (raw_page_id or "").strip().replace("-", "").lower()
+
+    @staticmethod
+    def parse_repo_name_from_github_url(github_url: str) -> str:
+        parts = [p for p in (github_url or "").strip().rstrip("/").split("/") if p]
+        if len(parts) >= 2:
+            return parts[-1]
+        return ""
+
     def notion_request(self, method: str, url: str, **kwargs):
         """Notion 请求: 代理失败时自动回退直连"""
         try:
@@ -246,6 +257,75 @@ class GitHubNotionSync:
                 break
 
         print(f"  ✓ 拉取完成: 扫描 {fetched_pages} 页记录,命中 GitHub 链接 {len(records)} 条")
+        return records
+
+    def fetch_notion_projects(self) -> List[Dict[str, Any]]:
+        """扫描 Notion 数据库并提取最小项目信息,用于回写本地配置"""
+        records: List[Dict[str, Any]] = []
+        github_link_type = self.get_property_type("GitHub 链接")
+        if github_link_type != "url":
+            print("  ⚠ Notion 的“GitHub 链接”字段不是 url 类型,无法拉取项目")
+            return records
+
+        print("从 Notion 拉取项目(用于本地合并)...")
+        query_url = f"https://api.notion.com/v1/databases/{self.database_id}/query"
+        start_cursor: Optional[str] = None
+        fetched_pages = 0
+
+        while True:
+            payload: Dict[str, Any] = {"page_size": 100}
+            if start_cursor:
+                payload["start_cursor"] = start_cursor
+
+            response = self.notion_request("POST", query_url, json=payload)
+            if response.status_code != 200:
+                print(f"  ⚠ 拉取 Notion 项目失败 ({response.status_code})")
+                break
+
+            data = response.json()
+            results = data.get("results", [])
+            fetched_pages += len(results)
+            for item in results:
+                if (item or {}).get("object") != "page":
+                    continue
+
+                page_id = (item or {}).get("id", "")
+                properties = (item or {}).get("properties", {})
+                github_prop = properties.get("GitHub 链接", {})
+                github_url = self.normalize_github_url(github_prop.get("url", ""))
+                if not page_id or not github_url:
+                    continue
+
+                title_items = ((properties.get("项目名称") or {}).get("title") or [])
+                project_name = "".join((node.get("plain_text") or "") for node in title_items).strip()
+                desc_items = ((properties.get("描述") or {}).get("rich_text") or [])
+                description = "".join((node.get("plain_text") or "") for node in desc_items).strip()
+                topic_items = ((properties.get("技术标签") or {}).get("multi_select") or [])
+                topics = [str((node or {}).get("name") or "").strip() for node in topic_items]
+                topics = [x for x in topics if x]
+                category_name = self.parse_category_name_from_properties(properties) or ""
+                repo_name = self.parse_repo_name_from_github_url(github_url)
+                project_id = repo_name.lower() if repo_name else self.slugify(project_name or github_url)
+
+                records.append(
+                    {
+                        "id": project_id,
+                        "name": project_name or repo_name,
+                        "description": description,
+                        "github": github_url,
+                        "topics": topics,
+                        "notion_page_id": page_id,
+                        "category_name": category_name,
+                    }
+                )
+
+            if not data.get("has_more"):
+                break
+            start_cursor = data.get("next_cursor")
+            if not start_cursor:
+                break
+
+        print(f"  ✓ 拉取完成: 扫描 {fetched_pages} 页记录,可合并项目 {len(records)} 条")
         return records
 
     def ensure_category_in_config(self, config: Dict[str, Any], category_name: str) -> Dict[str, Any]:
@@ -454,6 +534,129 @@ class GitHubNotionSync:
             return result
 
         return [(project, None) for project in config.get("projects", [])]
+
+    def merge_notion_projects_into_config(self, config: Dict[str, Any]) -> Dict[str, int]:
+        """
+        将 Notion 中项目合并到本地 config。
+        - 支持从 Notion 新增项目到本地
+        - 对已存在项目补齐缺失字段
+        - 可按 Notion 分类移动到对应分类
+        """
+        stats = {
+            "total_notion": 0,
+            "inserted": 0,
+            "merged": 0,
+            "filled_fields": 0,
+            "moved_category": 0,
+            "created_category": 0,
+        }
+
+        categories = config.setdefault("categories", [])
+        if not isinstance(categories, list):
+            config["categories"] = []
+            categories = config["categories"]
+
+        for category in categories:
+            category.setdefault("projects", [])
+
+        notion_projects = self.fetch_notion_projects()
+        stats["total_notion"] = len(notion_projects)
+        if not notion_projects:
+            return stats
+
+        def locate_project(project_ref: Dict[str, Any]) -> Tuple[Optional[Dict[str, Any]], int]:
+            for c in categories:
+                projects = c.get("projects", [])
+                for idx, p in enumerate(projects):
+                    if p is project_ref:
+                        return c, idx
+            return None, -1
+
+        def find_existing_project(notion_project: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+            target_page_id = self.normalize_notion_page_id(notion_project.get("notion_page_id", ""))
+            target_github = self.normalize_github_url(notion_project.get("github", ""))
+            for c in categories:
+                for p in c.get("projects", []):
+                    page_id = self.normalize_notion_page_id(p.get("notion_page_id", ""))
+                    github = self.normalize_github_url(p.get("github", ""))
+                    if target_page_id and page_id and target_page_id == page_id:
+                        return p
+                    if target_github and github and target_github == github:
+                        return p
+            return None
+
+        def fill_missing(target: Dict[str, Any], source: Dict[str, Any]) -> int:
+            changed = 0
+            for field in ["id", "name", "description", "github", "notion_page_id"]:
+                current = str(target.get(field, "") or "").strip()
+                incoming = str(source.get(field, "") or "").strip()
+                if (not current) and incoming:
+                    target[field] = incoming
+                    changed += 1
+            current_topics = target.get("topics") or []
+            incoming_topics = source.get("topics") or []
+            if (not current_topics) and incoming_topics:
+                target["topics"] = incoming_topics
+                changed += 1
+            return changed
+
+        for notion_project in notion_projects:
+            existing = find_existing_project(notion_project)
+            category_name = (notion_project.get("category_name") or "").strip() or "未分类"
+            before_count = len(categories)
+            target_category = self.ensure_category_in_config(config, category_name)
+            if len(categories) > before_count:
+                stats["created_category"] += 1
+
+            if existing is None:
+                new_project = {
+                    "id": str(notion_project.get("id") or "").strip(),
+                    "name": str(notion_project.get("name") or "").strip(),
+                    "description": str(notion_project.get("description") or "").strip(),
+                    "github": str(notion_project.get("github") or "").strip(),
+                    "topics": list(notion_project.get("topics") or []),
+                    "notion_page_id": str(notion_project.get("notion_page_id") or "").strip(),
+                }
+                target_category.setdefault("projects", []).append(new_project)
+                stats["inserted"] += 1
+                continue
+
+            stats["merged"] += 1
+            stats["filled_fields"] += fill_missing(existing, notion_project)
+            src_category, src_index = locate_project(existing)
+            if src_category is not None and src_category is not target_category and src_index >= 0:
+                moving = src_category.get("projects", []).pop(src_index)
+                target_category.setdefault("projects", []).append(moving)
+                stats["moved_category"] += 1
+
+        return stats
+
+    def hydrate_local_project_from_github(self, project: Dict[str, Any], github_info: Dict[str, Any]) -> int:
+        """将 GitHub API 信息回填到本地项目(仅补空字段)"""
+        changed = 0
+        fallback_id = str(github_info.get("name") or "").strip().lower()
+        if not (project.get("id") or "").strip() and fallback_id:
+            project["id"] = fallback_id
+            changed += 1
+
+        if not (project.get("name") or "").strip():
+            name = str(github_info.get("name") or "").strip()
+            if name:
+                project["name"] = name
+                changed += 1
+
+        if not (project.get("description") or "").strip():
+            desc = str(github_info.get("description") or "").strip()
+            if desc and desc != "暂无描述":
+                project["description"] = desc
+                changed += 1
+
+        if not (project.get("topics") or []):
+            topics = github_info.get("topics") or []
+            if topics:
+                project["topics"] = topics
+                changed += 1
+        return changed
     
     def load_projects_config(self, config_file: str) -> Dict:
         """加载项目配置文件"""
@@ -695,6 +898,18 @@ class GitHubNotionSync:
             url = f"https://api.notion.com/v1/pages/{page_id}"
             
             properties = {
+                "项目名称": {
+                    "title": [
+                        {
+                            "text": {
+                                "content": github_info.get('name', project.get('name', '未命名'))
+                            }
+                        }
+                    ]
+                },
+                "GitHub 链接": {
+                    "url": github_info['url']
+                },
                 "描述": {
                     "rich_text": [
                         {
@@ -783,6 +998,7 @@ class GitHubNotionSync:
         if not github_info:
             print("  ⚠ 跳过此项目")
             return project.get('notion_page_id'), "skipped"
+        self.hydrate_local_project_from_github(project, github_info)
         
         # 优先使用本地记录的 notion_page_id;若失效/缺失则按 GitHub 链接回查
         notion_page_id = project.get('notion_page_id', '').strip()
@@ -846,12 +1062,19 @@ class GitHubNotionSync:
                         project['notion_page_id'] = recovered_page_id
                         had_page_id = True
                         recovered_count += 1
-                if had_page_id:
+                missing_core = any(
+                    [
+                        not (project.get('name') or '').strip(),
+                        not (project.get('description') or '').strip(),
+                        not (project.get('topics') or []),
+                    ]
+                )
+                if had_page_id and not missing_core:
                     skipped_count += 1
                 else:
                     pending.append((project, category_name))
             projects_to_sync = pending
-            print(f"create_only 预检: 待创建 {len(projects_to_sync)} 个,已存在 {skipped_count} 个")
+            print(f"create_only 预检: 待处理 {len(projects_to_sync)} 个,完整且已存在 {skipped_count} 个")
             if recovered_count > 0:
                 print(f"  ✓ 其中按 GitHub 链接补齐 notion_page_id: {recovered_count} 个")
 
@@ -886,11 +1109,21 @@ class GitHubNotionSync:
                     had_page_id = True
 
             if sync_mode == 'create_only' and had_page_id:
-                print(f"\n[SKIP] {project.get('id', 'unknown')} 已存在 notion_page_id,按 create_only 跳过")
-                skipped_count += 1
-                if i < len(projects_with_category):
-                    time.sleep(1)
-                continue
+                missing_core = any(
+                    [
+                        not (project.get('name') or '').strip(),
+                        not (project.get('description') or '').strip(),
+                        not (project.get('topics') or []),
+                    ]
+                )
+                if missing_core:
+                    pass
+                else:
+                    print(f"\n[SKIP] {project.get('id', 'unknown')} 已存在 notion_page_id,按 create_only 跳过")
+                    skipped_count += 1
+                    if i < len(projects_with_category):
+                        time.sleep(1)
+                    continue
 
             if sync_mode == 'update_only' and not had_page_id:
                 print(f"\n[SKIP] {project.get('id', 'unknown')} 缺少 notion_page_id,按 update_only 跳过")
@@ -1050,6 +1283,10 @@ def main():
     PROJECTS_FILE_RAW = os.environ.get('PROJECTS_FILE', DEFAULT_CONFIG_FILENAME)
     PROJECTS_FILE = resolve_projects_file_path(project_root, PROJECTS_FILE_RAW)
     SYNC_MODE = normalize_sync_mode(SYNC_MODE_RAW)
+    SYNC_FROM_NOTION_FIRST = parse_bool_env(
+        os.environ.get('SYNC_FROM_NOTION_FIRST', 'true'),
+        default=True,
+    )
     SYNC_CATEGORY_FROM_NOTION = parse_bool_env(
         os.environ.get('SYNC_CATEGORY_FROM_NOTION', 'false'),
         default=False,
@@ -1081,12 +1318,35 @@ def main():
     # 可选: 先按 Notion “分类”字段对齐本地 categories
     config_file = PROJECTS_FILE
     config = syncer.load_projects_config(config_file)
+    config_changed = False
+
+    if SYNC_FROM_NOTION_FIRST:
+        print("\n[预处理] 启用 Notion -> 本地项目拉取")
+        merge_stats = syncer.merge_notion_projects_into_config(config)
+        print(
+            "[预处理] 拉取结果: "
+            f"Notion {merge_stats['total_notion']} 项, "
+            f"新增本地 {merge_stats['inserted']} 项, "
+            f"合并 {merge_stats['merged']} 项, "
+            f"补字段 {merge_stats['filled_fields']} 处, "
+            f"分类移动 {merge_stats['moved_category']} 项, "
+            f"新增分类 {merge_stats['created_category']} 个"
+        )
+        if (
+            merge_stats["inserted"] > 0
+            or merge_stats["merged"] > 0
+            or merge_stats["moved_category"] > 0
+            or merge_stats["created_category"] > 0
+            or merge_stats["filled_fields"] > 0
+        ):
+            config_changed = True
+
     config_changed = maybe_reconcile_categories_from_notion(
         enabled=SYNC_CATEGORY_FROM_NOTION,
         config=config,
         notion_token=NOTION_TOKEN,
         config_file=config_file,
-    )
+    ) or config_changed
 
     if SYNC_MODE == "reconcile_only":
         print("\n[模式] reconcile_only: 仅从 Notion 拉取并回写 notion_page_id + 分类")

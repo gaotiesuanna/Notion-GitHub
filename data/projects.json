@@ -54,18 +54,6 @@
           "notion_page_id": "300d0e79-ce27-8189-8ee6-c2afe4143dfa"
         },
         {
-          "id": "nanobot",
-          "name": "nanobot",
-          "description": "Lightweight AI agent framework and tooling",
-          "github": "https://github.com/HKUDS/nanobot",
-          "topics": [
-            "ai",
-            "agents",
-            "framework"
-          ],
-          "notion_page_id": "300d0e79-ce27-81fa-ad3e-f6cb074f1dc7"
-        },
-        {
           "id": "ten-framework",
           "name": "TEN Framework",
           "description": "Open-source framework for building real-time multimodal AI agents",
@@ -76,6 +64,57 @@
             "framework"
           ],
           "notion_page_id": "300d0e79-ce27-814b-91a7-f9ad894faa5c"
+        },
+        {
+          "id": "camel",
+          "name": "camel",
+          "description": "🐫 CAMEL: The first and the best multi-agent framework. Finding the Scaling Law of Agents. https://www.camel-ai.org",
+          "github": "https://github.com/camel-ai/camel",
+          "topics": [
+            "agent",
+            "ai-societies",
+            "artificial-intelligence",
+            "communicative-ai",
+            "cooperative-ai",
+            "deep-learning",
+            "large-language-models",
+            "multi-agent-systems",
+            "natural-language-processing"
+          ],
+          "notion_page_id": "304d0e79-ce27-81b8-82c0-d3a43da7e040"
+        },
+        {
+          "id": "agno",
+          "name": "agno",
+          "description": "Build multi-agent systems that learn and improve with every interaction.",
+          "github": "https://github.com/agno-agi/agno",
+          "topics": [
+            "agents",
+            "AI",
+            "ai-agents",
+            "developer-tools",
+            "python"
+          ],
+          "notion_page_id": "304d0e79-ce27-819f-844d-c6ec6b6af5ed"
+        },
+        {
+          "id": "miroflow",
+          "name": "MiroFlow",
+          "description": "MiroFlow is an agent framework that enables tool-use agent tasks, featuring a reproducible GAIA score of 82.4%.",
+          "github": "https://github.com/MiroMindAI/MiroFlow",
+          "topics": [
+            "agent-framework",
+            "agents",
+            "browsecomp",
+            "claude",
+            "deep-research",
+            "futurex",
+            "gaia",
+            "gpt-5",
+            "hle",
+            "research-agent"
+          ],
+          "notion_page_id": "306d0e79-ce27-81d8-9b6c-f2b283c8fc55"
         }
       ]
     },
@@ -119,6 +158,25 @@
             "llm"
           ],
           "notion_page_id": "300d0e79-ce27-81a0-a418-e7690e8f1176"
+        },
+        {
+          "id": "evermemos",
+          "name": "EverMemOS",
+          "description": "Long-term memory OS for your agents across LLMs and platforms.",
+          "github": "https://github.com/EverMind-AI/EverMemOS",
+          "topics": [
+            "agent-memory",
+            "agentic-ai",
+            "AI",
+            "chats",
+            "clawdbot",
+            "clawdbot-skill",
+            "llm",
+            "long-term-memory",
+            "mcp",
+            "memory"
+          ],
+          "notion_page_id": "304d0e79-ce27-81a3-bbf0-c7fd99e89361"
         }
       ]
     },
@@ -164,18 +222,6 @@
           "notion_page_id": "300d0e79-ce27-817f-9b57-cec9f1afe155"
         },
         {
-          "id": "ragflow",
-          "name": "RAGFlow",
-          "description": "Open-source RAG workflow platform for document QA and knowledge apps",
-          "github": "https://github.com/infiniflow/ragflow",
-          "topics": [
-            "rag",
-            "workflow",
-            "knowledge-base"
-          ],
-          "notion_page_id": "300d0e79-ce27-8102-a9cd-dbc60b3d4f89"
-        },
-        {
           "id": "dify",
           "name": "Dify",
           "description": "LLM application development platform with workflow orchestration",
@@ -186,6 +232,27 @@
             "ai-app"
           ],
           "notion_page_id": "300d0e79-ce27-8114-9c42-fbb7a6321c71"
+        },
+        {
+          "id": "lobehub",
+          "name": "lobehub",
+          "description": "The ultimate space for work and life — to find, build, and collaborate with agent teammates that grow with you. We are taking agent harness to the next level — enabling multi-agent collaboration, effortless agent team design, and introducing agents as the unit of work interaction.",
+          "github": "https://github.com/lobehub/lobehub",
+          "topics": [
+            "agent",
+            "agent-collaboration",
+            "agent-harness",
+            "ai",
+            "chatgpt",
+            "claude",
+            "deepseek",
+            "gemini",
+            "gpt",
+            "knowledge-base",
+            "mcp",
+            "openai"
+          ],
+          "notion_page_id": "313d0e79-ce27-80a0-9ced-ce91b8db6ad0"
         }
       ]
     },
@@ -272,6 +339,28 @@
             "ai"
           ],
           "notion_page_id": "300d0e79-ce27-810a-b01d-f96cf39807ce"
+        },
+        {
+          "id": "generative_agents",
+          "name": "generative_agents",
+          "description": "Generative Agents: Interactive Simulacra of Human Behavior",
+          "github": "https://github.com/joonspk-research/generative_agents",
+          "topics": [],
+          "notion_page_id": "313d0e79-ce27-800a-b986-fff3ca3a2d6f"
+        },
+        {
+          "id": "generativeagentscn",
+          "name": "generativeagentscn",
+          "description": "本项目为Generative Agents项目的重构+深度汉化版本，旨在为中文用户提供一个利于维护的基础版本，以便后续实验或功能拓展。",
+          "github": "https://github.com/x-glacier/generativeagentscn",
+          "topics": [
+            "generative-agents",
+            "generative-ai",
+            "multi-agent",
+            "multi-agent-simulation",
+            "multi-agent-systems"
+          ],
+          "notion_page_id": "313d0e79-ce27-80b4-939c-fc90348d5592"
         }
       ]
     },
@@ -334,6 +423,22 @@
             "design-system"
           ],
           "notion_page_id": "300d0e79-ce27-819b-9eee-d4402848d2ea"
+        },
+        {
+          "id": "chainlit",
+          "name": "chainlit",
+          "description": "Build Conversational AI in minutes ⚡️",
+          "github": "https://github.com/Chainlit/chainlit",
+          "topics": [
+            "chatgpt",
+            "langchain",
+            "llm",
+            "openai",
+            "openai-chatgpt",
+            "python",
+            "ui"
+          ],
+          "notion_page_id": "304d0e79-ce27-8169-9bd9-e82ebc787796"
         }
       ]
     },
@@ -479,7 +584,7 @@
             "llm",
             "from-scratch"
           ],
-          "notion_page_id": ""
+          "notion_page_id": "300d0e79-ce27-8185-8125-c45f0fda2ba1"
         },
         {
           "id": "vibe-coding-cn",
@@ -527,7 +632,7 @@
             "coding",
             "education"
           ],
-          "notion_page_id": ""
+          "notion_page_id": "304d0e79-ce27-819a-bba8-f64f159e7cff"
         },
         {
           "id": "easy-rl",
@@ -760,6 +865,44 @@
             "quota"
           ],
           "notion_page_id": "300d0e79-ce27-81a1-bee3-c615d19fe26b"
+        },
+        {
+          "id": "learn-claude-code",
+          "name": "learn-claude-code",
+          "description": "Bash is all You need - Write a nano Claude Code 0 - 1",
+          "github": "https://github.com/shareAI-lab/learn-claude-code",
+          "topics": [
+            "agent",
+            "agent-development",
+            "ai-agent",
+            "claude",
+            "claude-code",
+            "educational",
+            "llm",
+            "python",
+            "teaching",
+            "tutorial"
+          ],
+          "notion_page_id": "302d0e79-ce27-8126-9a14-d1d622e92a41"
+        },
+        {
+          "id": "stats",
+          "name": "Stats",
+          "description": "macOS system monitor in your menu bar",
+          "github": "https://github.com/exelban/stats",
+          "topics": [
+            "battery",
+            "bluetooth",
+            "clock",
+            "cpu",
+            "disk",
+            "fans",
+            "gpu",
+            "macos",
+            "menubar",
+            "monitor"
+          ],
+          "notion_page_id": "306d0e79-ce27-812f-9c02-c98adf52129e"
         }
       ]
     },
@@ -781,6 +924,348 @@
           "notion_page_id": "300d0e79-ce27-81a4-8bb7-d6eb9347ef22"
         },
         {
+          "id": "ragflow",
+          "name": "RAGFlow",
+          "description": "Open-source RAG workflow platform for document QA and knowledge apps",
+          "github": "https://github.com/infiniflow/ragflow",
+          "topics": [
+            "rag",
+            "workflow",
+            "knowledge-base"
+          ],
+          "notion_page_id": "300d0e79-ce27-8102-a9cd-dbc60b3d4f89"
+        },
+        {
+          "id": "lightrag",
+          "name": "LightRAG",
+          "description": "LightRAG project from HKUDS",
+          "github": "https://github.com/HKUDS/LightRAG",
+          "topics": [
+            "rag"
+          ],
+          "notion_page_id": "305d0e79-ce27-8163-824d-d9367aad7e6b"
+        },
+        {
+          "id": "llama-index",
+          "name": "llama_index",
+          "description": "llama_index project from run-llama",
+          "github": "https://github.com/run-llama/llama_index",
+          "topics": [
+            "rag"
+          ],
+          "notion_page_id": "305d0e79-ce27-81d8-9dd7-ffe0e7114874"
+        }
+      ]
+    },
+    {
+      "id": "voice",
+      "name": "voice",
+      "icon": "📁",
+      "projects": [
+        {
+          "id": "gpt-sovits",
+          "name": "GPT-SoVITS",
+          "description": "1 min voice data can also be used to train a good TTS model! (few shot voice cloning)",
+          "github": "https://github.com/RVC-Boss/GPT-SoVITS",
+          "topics": [
+            "text-to-speech",
+            "tts",
+            "vits",
+            "voice-clone",
+            "voice-cloneai",
+            "voice-cloning"
+          ],
+          "notion_page_id": "302d0e79-ce27-8176-8c62-f3b9f46ade9f"
+        },
+        {
+          "id": "bark-voice-cloning",
+          "name": "Bark-Voice-Cloning",
+          "description": "Bark Voice Cloning and Voice Cloning for Chinese Speech",
+          "github": "https://github.com/KevinWang676/Bark-Voice-Cloning",
+          "topics": [],
+          "notion_page_id": "302d0e79-ce27-816b-ad7b-db0165396bc3"
+        },
+        {
+          "id": "retrieval-based-voice-conversion-webui",
+          "name": "Retrieval-based-Voice-Conversion-WebUI",
+          "description": "Easily train a good VC model with voice data <= 10 mins!",
+          "github": "https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI",
+          "topics": [
+            "audio-analysis",
+            "change",
+            "conversational-ai",
+            "conversion",
+            "converter",
+            "retrieval-model",
+            "retrieve-data",
+            "rvc",
+            "so-vits-svc",
+            "sovits"
+          ],
+          "notion_page_id": "302d0e79-ce27-8149-bdab-e74db6476b81"
+        },
+        {
+          "id": "sensevoice",
+          "name": "SenseVoice",
+          "description": "Multilingual Voice Understanding Model",
+          "github": "https://github.com/FunAudioLLM/SenseVoice",
+          "topics": [
+            "AI",
+            "aigc",
+            "asr",
+            "audio-event-classification",
+            "cross-lingual",
+            "gpt-4o",
+            "llm",
+            "multilingual",
+            "python",
+            "pytorch"
+          ],
+          "notion_page_id": "302d0e79-ce27-818e-ac17-f3d65c348cfb"
+        },
+        {
+          "id": "cosyvoice",
+          "name": "CosyVoice",
+          "description": "Multi-lingual large voice generation model, providing inference, training and deployment full-stack ability.",
+          "github": "https://github.com/FunAudioLLM/CosyVoice",
+          "topics": [
+            "audio-generation",
+            "cantonese",
+            "chatbot",
+            "chatgpt",
+            "chinese",
+            "cosyvoice",
+            "cross-lingual",
+            "english",
+            "fine-grained",
+            "fine-tuning"
+          ],
+          "notion_page_id": "302d0e79-ce27-8146-8143-e0885ff719ad"
+        },
+        {
+          "id": "funasr",
+          "name": "FunASR",
+          "description": "A Fundamental End-to-End Speech Recognition Toolkit and Open Source SOTA Pretrained Models, Supporting Speech Recognition, Voice Activity Detection, Text Post-processing etc.",
+          "github": "https://github.com/modelscope/FunASR",
+          "topics": [
+            "audio-visual-speech-recognition",
+            "conformer",
+            "dfsmn",
+            "paraformer",
+            "pretrained-model",
+            "punctuation",
+            "pytorch",
+            "rnnt",
+            "speaker-diarization",
+            "speech-recognition"
+          ],
+          "notion_page_id": "302d0e79-ce27-81ed-93d7-d112c9e49132"
+        },
+        {
+          "id": "fish-speech",
+          "name": "fish-speech",
+          "description": "SOTA Open Source TTS",
+          "github": "https://github.com/fishaudio/fish-speech",
+          "topics": [
+            "llama",
+            "transformer",
+            "tts",
+            "valle",
+            "vits",
+            "vqgan",
+            "vqvae"
+          ],
+          "notion_page_id": "302d0e79-ce27-8147-964d-eb843d564959"
+        },
+        {
+          "id": "speech_recognition",
+          "name": "speech_recognition",
+          "description": "Speech recognition module for Python, supporting several engines and APIs, online and offline.",
+          "github": "https://github.com/Uberi/speech_recognition",
+          "topics": [
+            "audio",
+            "python",
+            "speech-recognition",
+            "speech-to-text"
+          ],
+          "notion_page_id": "304d0e79-ce27-8186-80cc-e784b94e0ccb"
+        },
+        {
+          "id": "voiceprintrecognition-pytorch",
+          "name": "VoiceprintRecognition-Pytorch",
+          "description": "This project uses a variety of advanced voiceprint recognition models such as EcapaTdnn, ResNetSE, ERes2Net, CAM++, etc. It is not excluded that more models will be supported in the future. At the same time, this project also supports MelSpectrogram, Spectrogram data preprocessing methods",
+          "github": "https://github.com/yeyupiaoling/VoiceprintRecognition-Pytorch",
+          "topics": [
+            "arcface",
+            "ecapa-tdnn",
+            "pytorch",
+            "speaker-recognition",
+            "voice-recognition"
+          ],
+          "notion_page_id": "304d0e79-ce27-816d-b568-db84994a8ab9"
+        },
+        {
+          "id": "vibevoice",
+          "name": "VibeVoice",
+          "description": "Open-Source Frontier Voice AI",
+          "github": "https://github.com/microsoft/VibeVoice",
+          "topics": [],
+          "notion_page_id": "306d0e79-ce27-81bd-947d-cdfe473f14b4"
+        },
+        {
+          "id": "meeting-minutes",
+          "name": "meeting-minutes",
+          "description": "Privacy first, AI meeting assistant with 4x faster Parakeet/Whisper live transcription, speaker diarization, and Ollama summarization built on Rust. 100% local processing. no cloud required. Meetily (Meetly Ai - https://meetily.ai) is the #1 Self-hosted,  Open-source Ai meeting note taker for macOS & Windows.",
+          "github": "https://github.com/Zackriya-Solutions/meeting-minutes",
+          "topics": [
+            "AI",
+            "ai-meeting-assistant",
+            "llm",
+            "local-ai",
+            "mac",
+            "meeting-minutes",
+            "meeting-notes",
+            "offline-first",
+            "ollama",
+            "parakeet"
+          ],
+          "notion_page_id": "306d0e79-ce27-816e-969d-f938d955bcd8"
+        },
+        {
+          "id": "pluely",
+          "name": "pluely",
+          "description": "The Open Source Alternative to Cluely - A lightning-fast, privacy-first AI assistant that works seamlessly during meetings, interviews, and conversations without anyone knowing. Built with Tauri for native performance, just 10MB. Completely undetectable in video calls, screen shares, and recordings.",
+          "github": "https://github.com/iamsrikanthnani/pluely",
+          "topics": [
+            "ai-assistant",
+            "claude",
+            "cluely-alternative",
+            "desktop-app",
+            "gemini",
+            "grok",
+            "grok-4",
+            "llm",
+            "openai",
+            "react"
+          ],
+          "notion_page_id": "306d0e79-ce27-8126-8e6b-fcdc29a7f835"
+        },
+        {
+          "id": "pipecat",
+          "name": "pipecat",
+          "description": "Open Source framework for voice and multimodal conversational AI",
+          "github": "https://github.com/pipecat-ai/pipecat",
+          "topics": [
+            "AI",
+            "chatbot-framework",
+            "chatbots",
+            "real-time",
+            "voice",
+            "voice-assistant"
+          ],
+          "notion_page_id": "306d0e79-ce27-8188-8869-d4a480ff8153"
+        },
+        {
+          "id": "jitsi-meet",
+          "name": "jitsi-meet",
+          "description": "Jitsi Meet - Secure, Simple and Scalable Video Conferences that you use as a standalone app or embed in your web application.",
+          "github": "https://github.com/jitsi/jitsi-meet",
+          "topics": [
+            "debian",
+            "deep-video",
+            "jitsi",
+            "jitsi-meet",
+            "scalable-video-conferences",
+            "sfu",
+            "video",
+            "video-communication",
+            "video-conferencing",
+            "webrtc"
+          ],
+          "notion_page_id": "306d0e79-ce27-8117-acf0-f5eb585d5b92"
+        },
+        {
+          "id": "livekit",
+          "name": "livekit",
+          "description": "End-to-end realtime stack for connecting humans and AI",
+          "github": "https://github.com/livekit/livekit",
+          "topics": [
+            "golang",
+            "media-server",
+            "sfu",
+            "video",
+            "voice",
+            "voice-ai",
+            "webrtc"
+          ],
+          "notion_page_id": "306d0e79-ce27-814c-993e-e833865c290e"
+        },
+        {
+          "id": "agents",
+          "name": "agents",
+          "description": "A powerful framework for building realtime voice AI agents 🤖🎙️📹",
+          "github": "https://github.com/livekit/agents",
+          "topics": [
+            "agents",
+            "AI",
+            "openai",
+            "real-time",
+            "video",
+            "voice"
+          ],
+          "notion_page_id": "306d0e79-ce27-81ae-bfa8-d7cda6ccefbf"
+        }
+      ]
+    },
+    {
+      "id": "route",
+      "name": "route",
+      "icon": "🧭",
+      "projects": [
+        {
+          "id": "litellm",
+          "name": "litellm",
+          "description": "Python SDK, Proxy Server (AI Gateway) to call 100+ LLM APIs in OpenAI (or native) format, with cost tracking, guardrails, loadbalancing and logging. [Bedrock, Azure, OpenAI, VertexAI, Cohere, Anthropic, Sagemaker, HuggingFace, VLLM, NVIDIA NIM]",
+          "github": "https://github.com/BerriAI/litellm",
+          "topics": [
+            "ai-gateway",
+            "anthropic",
+            "azure-openai",
+            "bedrock",
+            "gateway",
+            "langchain",
+            "litellm",
+            "llm",
+            "llm-gateway",
+            "llmops"
+          ],
+          "notion_page_id": "304d0e79-ce27-813a-8ecf-c48a57ab6811"
+        },
+        {
+          "id": "claude-code-proxy",
+          "name": "claude-code-proxy",
+          "description": "Run Claude Code on OpenAI models",
+          "github": "https://github.com/1rgs/claude-code-proxy",
+          "topics": [],
+          "notion_page_id": "304d0e79-ce27-81d8-ab16-da52bf68b80d"
+        },
+        {
+          "id": "fuergaosi233-claude-code-proxy",
+          "name": "claude-code-proxy",
+          "description": "Claude Code to OpenAI API Proxy",
+          "github": "https://github.com/fuergaosi233/claude-code-proxy",
+          "topics": [],
+          "notion_page_id": "304d0e79-ce27-81c1-9886-ef8e85208951"
+        },
+        {
+          "id": "claude-code-router",
+          "name": "claude-code-router",
+          "description": "Use Claude Code as the foundation for coding infrastructure, allowing you to decide how to interact with the model while enjoying updates from Anthropic.",
+          "github": "https://github.com/musistudio/claude-code-router",
+          "topics": [],
+          "notion_page_id": "304d0e79-ce27-81ae-8888-d8509f12e8f9"
+        },
+        {
           "id": "deepwiki-open",
           "name": "deepwiki-open",
           "description": "Open-source DeepWiki-style project for codebase analysis and understanding",
@@ -790,7 +1275,154 @@
             "code",
             "analysis"
           ],
-          "notion_page_id": ""
+          "notion_page_id": "304d0e79-ce27-8157-8c11-e49a06d03bd5"
+        }
+      ]
+    },
+    {
+      "id": "桌面工具",
+      "name": "桌面工具",
+      "icon": "🖥️",
+      "projects": [
+        {
+          "id": "anything-llm",
+          "name": "anything-llm",
+          "description": "The all-in-one Desktop & Docker AI application with built-in RAG, AI agents, No-code agent builder, MCP compatibility,  and more.",
+          "github": "https://github.com/Mintplex-Labs/anything-llm",
+          "topics": [
+            "ai-agents",
+            "custom-ai-agents",
+            "deepseek",
+            "kimi",
+            "llama3",
+            "llm",
+            "lmstudio",
+            "local-llm",
+            "localai",
+            "mcp"
+          ],
+          "notion_page_id": "304d0e79-ce27-8128-a4af-f969fcc69e40"
+        },
+        {
+          "id": "nanobot",
+          "name": "nanobot",
+          "description": "Lightweight AI agent framework and tooling",
+          "github": "https://github.com/HKUDS/nanobot",
+          "topics": [
+            "ai",
+            "agents",
+            "framework"
+          ],
+          "notion_page_id": "300d0e79-ce27-81fa-ad3e-f6cb074f1dc7"
+        },
+        {
+          "id": "openclaw",
+          "name": "openclaw",
+          "description": "Your own personal AI assistant. Any OS. Any Platform. The lobster way. 🦞",
+          "github": "https://github.com/openclaw/openclaw",
+          "topics": [
+            "AI",
+            "assistant",
+            "crustacean",
+            "molty",
+            "openclaw",
+            "own-your-data",
+            "personal"
+          ],
+          "notion_page_id": "302d0e79-ce27-81e0-ace0-cafc375e8389"
+        },
+        {
+          "id": "nanoclaw",
+          "name": "nanoclaw",
+          "description": "A lightweight alternative to Clawdbot / OpenClaw that runs in Apple containers for security. Connects to WhatsApp, has memory, scheduled jobs, and runs directly on Anthropic's Agents SDK",
+          "github": "https://github.com/qwibitai/nanoclaw",
+          "topics": [
+            "ai-agents",
+            "ai-assistant",
+            "claude-code",
+            "claude-skills",
+            "clawdbot"
+          ],
+          "notion_page_id": "304d0e79-ce27-819c-bcc6-c595f337fc79"
+        },
+        {
+          "id": "aipyapp",
+          "name": "aipyapp",
+          "description": "AI-Powered Python & Python-Powered AI (Python-Use)",
+          "github": "https://github.com/knownsec/aipyapp",
+          "topics": [],
+          "notion_page_id": "300d0e79-ce27-8058-a0de-ea3f8a43f7af"
+        }
+      ]
+    },
+    {
+      "id": "benchmark",
+      "name": "benchmark",
+      "icon": "📁",
+      "projects": [
+        {
+          "id": "phoenix",
+          "name": "phoenix",
+          "description": "AI Observability & Evaluation",
+          "github": "https://github.com/arize-ai/phoenix",
+          "topics": [
+            "agents",
+            "ai-monitoring",
+            "ai-observability",
+            "aiengineering",
+            "anthropic",
+            "datasets",
+            "evals",
+            "langchain",
+            "llamaindex",
+            "llm-eval",
+            "llm-evaluation",
+            "llmops",
+            "llms",
+            "openai",
+            "prompt-engineering",
+            "smolagents"
+          ],
+          "notion_page_id": "306d0e79-ce27-8033-b1dc-f08393f99285"
+        }
+      ]
+    },
+    {
+      "id": "skills",
+      "name": "skills",
+      "icon": "📁",
+      "projects": [
+        {
+          "id": "awesome-claude-skills",
+          "name": "awesome-claude-skills",
+          "description": "A curated list of awesome Claude Skills, resources, and tools for customizing Claude AI workflows",
+          "github": "https://github.com/composiohq/awesome-claude-skills",
+          "topics": [
+            "agent-skills",
+            "ai-agents",
+            "antigravity",
+            "automation",
+            "claude",
+            "claude-code",
+            "codex",
+            "composio",
+            "cursor",
+            "gemini-cli",
+            "mcp",
+            "rube",
+            "saas",
+            "skill",
+            "workflow-automation"
+          ],
+          "notion_page_id": "306d0e79-ce27-809b-8863-f0020da0e752"
+        },
+        {
+          "id": "nanobanana-ppt-skills",
+          "name": "nanobanana-ppt-skills",
+          "description": "NanoBanana PPT Skills 基于 AI 自动生成高质量 PPT 图片和视频的强大工具，支持智能转场和交互式播放",
+          "github": "https://github.com/op7418/nanobanana-ppt-skills",
+          "topics": [],
+          "notion_page_id": "313d0e79-ce27-80cd-98a0-d515113a4d91"
         }
       ]
     }
